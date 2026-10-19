@@ -1,0 +1,115 @@
+// Master list of supervisors and their assigned stores with refined, elegant brand colors
+export const INITIAL_SUPERVISORS = [
+  {
+    id: 'sup_damaris',
+    name: 'Damaris Burgos',
+    title: 'Supervisora de Tiendas',
+    color: '#0284c7', // Slate cyan
+    badge: 'bg-sky-50 text-sky-700 border-sky-200 shadow-sm'
+  },
+  {
+    id: 'sup_wanda',
+    name: 'Wanda Ruiz',
+    title: 'Supervisora de Tiendas',
+    color: '#0d9488', // Teal
+    badge: 'bg-teal-50 text-teal-700 border-teal-200 shadow-sm'
+  },
+  {
+    id: 'sup_evelyn',
+    name: 'Evelyn Cedrón',
+    title: 'Supervisora de Tiendas',
+    color: '#4f46e5', // Indigo
+    badge: 'bg-indigo-50 text-indigo-700 border-indigo-200 shadow-sm'
+  },
+  {
+    id: 'sup_selene',
+    name: 'Selene Hernández',
+    title: 'Supervisora Tienda Propia',
+    color: '#059669', // Emerald
+    badge: 'bg-emerald-50 text-emerald-700 border-emerald-200 shadow-sm'
+  },
+  {
+    id: 'sup_sasha',
+    name: 'Sasha Alfini',
+    title: 'Supervisora Tienda Propia',
+    color: '#7c3aed', // Purple
+    badge: 'bg-purple-50 text-purple-700 border-purple-200 shadow-sm'
+  },
+  {
+    id: 'sup_martin',
+    name: 'Martín Sastre',
+    title: 'Supervisor Tienda Propia',
+    color: '#2563eb', // Royal Blue
+    badge: 'bg-blue-50 text-blue-700 border-blue-200 shadow-sm'
+  }
+];
+
+export const INITIAL_STORES = [
+  // Damaris Burgos
+  { id: 't_ballester', name: 'Ballester', sup: 'sup_damaris' },
+  { id: 't_balvanera', name: 'Balvanera', sup: 'sup_damaris' },
+  { id: 't_barrancas_belgrano', name: 'Barrancas de Belgrano', sup: 'sup_damaris' },
+  { id: 't_belgrano', name: 'Belgrano', sup: 'sup_damaris' },
+  { id: 't_caballito', name: 'Caballito', sup: 'sup_damaris' },
+  { id: 't_del_viso', name: 'Del Viso', sup: 'sup_damaris' },
+  { id: 't_floresta', name: 'Floresta', sup: 'sup_damaris' },
+  { id: 't_martinez', name: 'Martínez', sup: 'sup_damaris' },
+  { id: 't_munro', name: 'Munro', sup: 'sup_damaris' },
+  { id: 't_palermo', name: 'Palermo', sup: 'sup_damaris' },
+  { id: 't_puerto_madero', name: 'Puerto Madero', sup: 'sup_damaris' },
+  { id: 't_villa_adelina', name: 'Villa Adelina', sup: 'sup_damaris' },
+
+  // Wanda Ruiz
+  { id: 't_campana', name: 'Campana', sup: 'sup_wanda' },
+  { id: 't_don_torcuato', name: 'Don Torcuato', sup: 'sup_wanda' },
+  { id: 't_general_pacheco', name: 'General Pacheco', sup: 'sup_wanda' },
+  { id: 't_ituzaingo', name: 'Ituzaingó', sup: 'sup_wanda' },
+  { id: 't_los_polvorines', name: 'Los Polvorines', sup: 'sup_wanda' },
+  { id: 't_maschwitz', name: 'Ingeniero Maschwitz', sup: 'sup_wanda' },
+  { id: 't_mataderos', name: 'Mataderos', sup: 'sup_wanda' },
+  { id: 't_merlo', name: 'Merlo', sup: 'sup_wanda' },
+  { id: 't_moreno', name: 'Moreno', sup: 'sup_wanda' },
+  { id: 't_paternal', name: 'Paternal', sup: 'sup_wanda' },
+  { id: 't_tigre', name: 'Tigre', sup: 'sup_wanda' },
+  { id: 't_villa_urquiza', name: 'Villa Urquiza', sup: 'sup_wanda' },
+
+  // Evelyn Cedrón
+  { id: 't_bella_vista', name: 'Bella Vista', sup: 'sup_evelyn' },
+  { id: 't_devoto', name: 'Devoto', sup: 'sup_evelyn' },
+  { id: 't_escobar', name: 'Escobar', sup: 'sup_evelyn' },
+  { id: 't_florida', name: 'Florida', sup: 'sup_evelyn' },
+  { id: 't_hurlingham', name: 'Hurlingham', sup: 'sup_evelyn' },
+  { id: 't_jose_c_paz', name: 'José C. Paz', sup: 'sup_evelyn' },
+  { id: 't_muniz', name: 'Muñiz', sup: 'sup_evelyn' },
+  { id: 't_pilar_centro', name: 'Pilar Centro', sup: 'sup_evelyn' },
+  { id: 't_pilar_derqui', name: 'Pilar Derqui', sup: 'sup_evelyn' },
+  { id: 't_san_fernando', name: 'San Fernando', sup: 'sup_evelyn' },
+  { id: 't_san_martin', name: 'San Martín', sup: 'sup_evelyn' },
+  { id: 't_san_miguel', name: 'San Miguel', sup: 'sup_evelyn' },
+
+  // Tiendas Propias
+  { id: 't_canitas', name: 'Las Cañitas', sup: 'sup_selene', isPropia: true },
+  { id: 't_villa_crespo', name: 'Villa Crespo', sup: 'sup_sasha', isPropia: true },
+  { id: 't_vicente_lopez', name: 'Vicente López', sup: 'sup_martin', isPropia: true }
+];
+
+export const INITIAL_THRESHOLDS = {
+  cancelacionesPct: { ok: 0.5, warning: 1.5, invert: true, unit: '%' },
+  reclamosPct: { ok: 1.5, warning: 2.5, invert: true, unit: '%' },
+  demorasPct: { ok: 5.0, warning: 10.0, invert: true, unit: '%' },
+  disponibilidad: { ok: 98.0, warning: 95.0, invert: false, unit: '%' }
+};
+
+export const CHANNELS = [
+  { id: 'PedidosYa', label: 'PedidosYa', badgeBg: 'bg-rose-50 text-rose-600 border-rose-200' },
+  { id: 'Rappi', label: 'Rappi', badgeBg: 'bg-orange-50 text-orange-600 border-orange-200' },
+  { id: 'Mercado Delivery', label: 'Mercado Delivery', badgeBg: 'bg-emerald-50 text-emerald-700 border-emerald-200' }
+];
+
+export const REVIEW_CHANNELS = [
+  { id: 'PedidosYa', label: 'PedidosYa', color: '#e11d48' },
+  { id: 'Rappi', label: 'Rappi', color: '#ea580c' },
+  { id: 'Mercado Delivery', label: 'Mercado Delivery', color: '#059669' },
+  { id: 'TePido', label: 'TePido', color: '#2563eb' },
+  { id: 'Google', label: 'Google Maps', color: '#4b5563' }
+];
