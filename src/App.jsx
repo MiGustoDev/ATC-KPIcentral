@@ -96,34 +96,42 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen pb-16">
-      <Header
-        activeModule={activeModule}
-        onModuleChange={setActiveModule}
-        onOpenImport={() => setIsImportOpen(true)}
-        onOpenThresholds={() => setIsThresholdsOpen(true)}
-        periodCount={availablePeriods.length}
-      />
+    <div className="min-h-screen flex flex-col justify-between">
+      <div>
+        <Header
+          activeModule={activeModule}
+          onModuleChange={setActiveModule}
+          onOpenImport={() => setIsImportOpen(true)}
+          onOpenThresholds={() => setIsThresholdsOpen(true)}
+          periodCount={availablePeriods.length}
+        />
 
-      <main ref={mainContentRef} className="w-full px-4 sm:px-8 py-2">
-        {activeModule === 'operational' ? (
+        <main ref={mainContentRef} className="w-full px-4 sm:px-8 py-2">
+          {activeModule === 'operational' ? (
+            <OperationalDashboard
+              periodData={datasets[selectedPeriod]}
+              selectedPeriod={selectedPeriod}
+              onPeriodChange={setSelectedPeriod}
+              availablePeriods={availablePeriods}
+              supervisors={INITIAL_SUPERVISORS}
+              stores={INITIAL_STORES}
+              thresholds={thresholds}
+            />
+          ) : (
+            <ReviewsDashboard
+              supervisors={INITIAL_SUPERVISORS}
+              stores={INITIAL_STORES}
+            />
+          )}
+        </main>
+      </div>
 
-          <OperationalDashboard
-            periodData={datasets[selectedPeriod]}
-            selectedPeriod={selectedPeriod}
-            onPeriodChange={setSelectedPeriod}
-            availablePeriods={availablePeriods}
-            supervisors={INITIAL_SUPERVISORS}
-            stores={INITIAL_STORES}
-            thresholds={thresholds}
-          />
-        ) : (
-          <ReviewsDashboard
-            supervisors={INITIAL_SUPERVISORS}
-            stores={INITIAL_STORES}
-          />
-        )}
-      </main>
+      {/* Subtle & clean footer */}
+      <footer className="w-full mt-12 border-t border-slate-800/80 bg-slate-950/60 backdrop-blur-sm py-5 px-4 text-center">
+        <p className="text-xs text-slate-400 font-medium tracking-wide">
+          &copy; Desarrollado por el Departamento de Sistemas de Mi Gusto | Todos los derechos reservados.
+        </p>
+      </footer>
 
       {/* Modals */}
       <ImportModal

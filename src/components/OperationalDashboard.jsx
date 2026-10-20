@@ -9,6 +9,7 @@ import { useGSAP } from '@gsap/react';
 import { fmtInt, fmtCurrency, fmtPct, getMetricStatus } from '../utils';
 import { CHANNELS } from '../config';
 import { AnimatedCounter } from './AnimatedCounter';
+import { CustomSelect } from './CustomSelect';
 
 export function OperationalDashboard({
   periodData,
@@ -272,15 +273,13 @@ export function OperationalDashboard({
               <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
                 Período:
               </span>
-              <select
+              <CustomSelect
                 value={selectedPeriod}
-                onChange={(e) => onPeriodChange(e.target.value)}
-                className="bg-slate-950 border border-slate-800 hover:border-slate-700 text-white text-xs sm:text-sm font-semibold rounded-xl px-3 py-2 focus:outline-none focus:border-amber-500 transition-all cursor-pointer shadow-sm"
-              >
-                {availablePeriods.map((p) => (
-                  <option key={p} value={p}>{p}</option>
-                ))}
-              </select>
+                onChange={onPeriodChange}
+                options={availablePeriods.map((p) => ({ value: p, label: p }))}
+                placeholder="Seleccionar período"
+                className="w-48 sm:w-56"
+              />
             </div>
 
             {/* Canal Switcher */}
@@ -320,16 +319,20 @@ export function OperationalDashboard({
               <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
                 Supervisora:
               </span>
-              <select
+              <CustomSelect
                 value={selectedSup}
-                onChange={(e) => setSelectedSup(e.target.value)}
-                className="bg-slate-950 border border-slate-800 hover:border-slate-700 text-white text-xs sm:text-sm font-semibold rounded-xl px-3 py-2 focus:outline-none focus:border-amber-500 transition-all cursor-pointer shadow-sm"
-              >
-                <option value="ALL">Todas las Supervisoras</option>
-                {supervisors.map((s) => (
-                  <option key={s.id} value={s.id}>{s.name}</option>
-                ))}
-              </select>
+                onChange={setSelectedSup}
+                options={[
+                  { value: 'ALL', label: 'Todas las Supervisoras' },
+                  ...supervisors.map((s) => ({
+                    value: s.id,
+                    label: s.name,
+                    color: s.color
+                  }))
+                ]}
+                placeholder="Seleccionar supervisora"
+                className="w-52 sm:w-60"
+              />
             </div>
           </div>
 
@@ -479,7 +482,7 @@ export function OperationalDashboard({
       {/* View Content */}
       {activeTab === 'table' ? (
         <div className="op-view-content bg-slate-900/90 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl">
-          <div className="overflow-x-auto max-h-[700px]">
+          <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse text-xs sm:text-sm">
               <thead className="sticky top-0 z-10 bg-slate-950/95 border-b border-slate-800 text-[11px] font-extrabold uppercase tracking-wider text-slate-400">
                 <tr>

@@ -1,7 +1,7 @@
 import React, { useRef } from 'react';
 import { 
-  BarChart3, LayoutDashboard, Star, Upload, 
-  SlidersHorizontal, Sparkles
+  LayoutDashboard, Star, Upload, 
+  SlidersHorizontal
 } from 'lucide-react';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';

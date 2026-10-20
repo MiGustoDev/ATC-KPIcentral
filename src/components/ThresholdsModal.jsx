@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Sliders, CheckCircle2, RotateCcw } from 'lucide-react';
+import { Sliders, RotateCcw } from 'lucide-react';
 import { INITIAL_THRESHOLDS } from '../config';
 import { ModalWrapper } from './ModalWrapper';
 
