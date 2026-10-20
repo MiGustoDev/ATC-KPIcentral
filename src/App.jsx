@@ -1,5 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import confetti from 'canvas-confetti';
+import gsap from 'gsap';
+import { useGSAP } from '@gsap/react';
 import { Header } from './components/Header';
 import { OperationalDashboard } from './components/OperationalDashboard';
 import { ReviewsDashboard } from './components/ReviewsDashboard';
@@ -11,10 +13,22 @@ import preloadedData from './preloadedData.json';
 const LS_DATA_KEY = 'mg_kpi_central_data_v3';
 const LS_THRESHOLDS_KEY = 'mg_kpi_thresholds_v3';
 
-
-
 export default function App() {
   const [activeModule, setActiveModule] = useState('operational'); // 'operational' | 'reviews'
+  const mainContentRef = useRef(null);
+
+  useGSAP(
+    () => {
+      if (mainContentRef.current) {
+        gsap.fromTo(
+          mainContentRef.current,
+          { opacity: 0, y: 10 },
+          { opacity: 1, y: 0, duration: 0.38, ease: 'power2.out' }
+        );
+      }
+    },
+    { dependencies: [activeModule] }
+  );
 
   // Datasets loaded from preloaded JSON or LocalStorage
   const [datasets, setDatasets] = useState(() => {
@@ -91,7 +105,7 @@ export default function App() {
         periodCount={availablePeriods.length}
       />
 
-      <main className="w-full px-4 sm:px-8 py-2">
+      <main ref={mainContentRef} className="w-full px-4 sm:px-8 py-2">
         {activeModule === 'operational' ? (
 
           <OperationalDashboard

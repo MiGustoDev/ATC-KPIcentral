@@ -1,10 +1,14 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import { 
-  Star, TrendingDown, TrendingUp, AlertTriangle, 
+  Star, TrendingUp, AlertTriangle, 
   MessageSquare, Plus, ArrowUpRight, ArrowDownRight,
-  Search, ShieldAlert, Sparkles, Filter, CheckCircle2
+  Search
 } from 'lucide-react';
+import gsap from 'gsap';
+import { useGSAP } from '@gsap/react';
 import { REVIEW_CHANNELS } from '../config';
+import { AnimatedCounter } from './AnimatedCounter';
+import { ModalWrapper } from './ModalWrapper';
 
 // Initial synthetic monthly reviews structure covering 5 channels
 export const INITIAL_REVIEWS_DATA = {
@@ -82,6 +86,31 @@ export function ReviewsDashboard({ supervisors, stores }) {
   const [selectedSup, setSelectedSup] = useState('ALL');
   const [searchTerm, setSearchTerm] = useState('');
   const [showAddModal, setShowAddModal] = useState(false);
+
+  const reviewsContainerRef = useRef(null);
+
+  // GSAP animation for filter bar and metrics cards
+  useGSAP(
+    () => {
+      const tl = gsap.timeline({ defaults: { ease: 'power2.out' } });
+      tl.fromTo(
+        '.rev-filter-bar',
+        { opacity: 0, y: -8 },
+        { opacity: 1, y: 0, duration: 0.4 }
+      ).fromTo(
+        '.rev-metric-card',
+        { opacity: 0, y: 14, scale: 0.97 },
+        { opacity: 1, y: 0, scale: 1, duration: 0.45, stagger: 0.05 },
+        '-=0.2'
+      ).fromTo(
+        '.rev-table-container',
+        { opacity: 0, y: 10 },
+        { opacity: 1, y: 0, duration: 0.38 },
+        '-=0.2'
+      );
+    },
+    { scope: reviewsContainerRef, dependencies: [selectedMonth, selectedCanal, selectedSup] }
+  );
 
   // New review form state
   const [newForm, setNewForm] = useState({
@@ -172,9 +201,9 @@ export function ReviewsDashboard({ supervisors, stores }) {
   };
 
   return (
-    <div className="space-y-5 w-full">
+    <div ref={reviewsContainerRef} className="space-y-5 w-full">
       {/* Filter Bar */}
-      <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-3.5 sm:p-4 shadow-xl">
+      <div className="rev-filter-bar bg-slate-900/90 border border-slate-800 rounded-2xl p-3.5 sm:p-4 shadow-xl">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex flex-wrap items-center gap-3 sm:gap-4">
             {/* Month */}
@@ -251,7 +280,7 @@ export function ReviewsDashboard({ supervisors, stores }) {
 
             <button
               onClick={() => setShowAddModal(true)}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-extrabold shadow-lg shadow-amber-500/20 transition-all"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-extrabold shadow-lg shadow-amber-500/20 transition-all duration-200 hover:-translate-y-0.5 active:scale-95"
             >
               <Plus className="w-4 h-4" />
               <span>Carga Mensual</span>
@@ -260,10 +289,10 @@ export function ReviewsDashboard({ supervisors, stores }) {
         </div>
       </div>
 
-      {/* Metrics Row */}
+      {/* Metrics Row with GSAP Stagger and Animated Counters */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 font-mono-numbers">
         {/* Puntuación Promedio */}
-        <div className="bg-slate-900/90 border border-slate-800/90 rounded-2xl p-4 shadow-lg">
+        <div className="rev-metric-card bg-slate-900/90 border border-slate-800/90 rounded-2xl p-4 shadow-lg hover:-translate-y-1 hover:border-slate-700/80 hover:shadow-xl hover:shadow-black/40 transition-all duration-200 cursor-default">
           <div className="flex items-center justify-between text-xs text-slate-400 mb-1.5 font-sans">
             <span className="font-semibold">Puntuación Promedio General</span>
             <div className="w-7 h-7 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center">
@@ -271,14 +300,14 @@ export function ReviewsDashboard({ supervisors, stores }) {
             </div>
           </div>
           <div className="text-2xl sm:text-3xl font-black text-white flex items-baseline gap-2">
-            <span>{summary.avgScore}</span>
+            <AnimatedCounter value={parseFloat(summary.avgScore) || 0} decimals={2} />
             <span className="text-sm font-semibold text-slate-500">/ 5.00</span>
           </div>
           <div className="text-[11px] text-slate-500 font-sans mt-0.5">Ponderado por volumen de reseñas</div>
         </div>
 
         {/* Reseñas Nuevas */}
-        <div className="bg-slate-900/90 border border-slate-800/90 rounded-2xl p-4 shadow-lg">
+        <div className="rev-metric-card bg-slate-900/90 border border-slate-800/90 rounded-2xl p-4 shadow-lg hover:-translate-y-1 hover:border-slate-700/80 hover:shadow-xl hover:shadow-black/40 transition-all duration-200 cursor-default">
           <div className="flex items-center justify-between text-xs text-slate-400 mb-1.5 font-sans">
             <span className="font-semibold">Total Nuevas Reseñas</span>
             <div className="w-7 h-7 rounded-lg bg-blue-500/10 text-blue-400 flex items-center justify-center">
@@ -286,13 +315,13 @@ export function ReviewsDashboard({ supervisors, stores }) {
             </div>
           </div>
           <div className="text-2xl sm:text-3xl font-black text-white">
-            {summary.totalReviews.toLocaleString('es-AR')}
+            <AnimatedCounter value={summary.totalReviews} decimals={0} />
           </div>
           <div className="text-[11px] text-slate-500 font-sans mt-0.5">Relevadas en el mes actual</div>
         </div>
 
         {/* Alertas de Caída */}
-        <div className="bg-slate-900/90 border border-slate-800/90 rounded-2xl p-4 shadow-lg">
+        <div className="rev-metric-card bg-slate-900/90 border border-slate-800/90 rounded-2xl p-4 shadow-lg hover:-translate-y-1 hover:border-slate-700/80 hover:shadow-xl hover:shadow-black/40 transition-all duration-200 cursor-default">
           <div className="flex items-center justify-between text-xs text-slate-400 mb-1.5 font-sans">
             <span className="font-semibold">Alertas por Caída de Calificación</span>
             <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${
@@ -302,14 +331,14 @@ export function ReviewsDashboard({ supervisors, stores }) {
             </div>
           </div>
           <div className={`text-2xl sm:text-3xl font-black ${summary.dropCount > 0 ? 'text-rose-400' : 'text-emerald-400'}`}>
-            {summary.dropCount}
+            <AnimatedCounter value={summary.dropCount} decimals={0} />
           </div>
           <div className="text-[11px] text-slate-500 font-sans mt-0.5">Sucursales con baja &ge; 0.15 pts</div>
         </div>
       </div>
 
       {/* Reviews Table */}
-      <div className="bg-slate-900/90 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl">
+      <div className="rev-table-container bg-slate-900/90 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl">
         <div className="p-3.5 sm:p-4 border-b border-slate-800 flex flex-wrap items-center justify-between gap-2">
           <h3 className="font-bold text-xs sm:text-sm text-white">
             Puntuaciones Relevadas ({filteredItems.length} registros)
@@ -342,7 +371,7 @@ export function ReviewsDashboard({ supervisors, stores }) {
                 const isGain = diff > 0.05;
 
                 return (
-                  <tr key={`${item.tienda}-${item.canal}-${idx}`} className="hover:bg-slate-800/40 transition-colors">
+                  <tr key={`${item.tienda}-${item.canal}-${idx}`} className="rev-row-anim hover:bg-slate-800/40 transition-colors">
                     <td className="p-3.5 font-sans">
                       <span className="px-2.5 py-0.5 rounded-full text-xs font-bold border bg-slate-800 text-slate-300 border-slate-700">
                         {item.canal}
@@ -408,103 +437,103 @@ export function ReviewsDashboard({ supervisors, stores }) {
       </div>
 
       {/* Modal Carga Mensual */}
-      {showAddModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-fade-in">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
-            <h3 className="font-extrabold text-base text-white flex items-center gap-2">
-              <Star className="w-5 h-5 text-amber-400 fill-amber-400" />
-              Carga Mensual de Puntuación
-            </h3>
-            <p className="text-xs text-slate-400">
-              Registra la puntuación y volumen de reseñas de la sucursal para el mes seleccionado.
-            </p>
+      <ModalWrapper
+        isOpen={showAddModal}
+        onClose={() => setShowAddModal(false)}
+        className="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl"
+      >
+        <h3 className="font-extrabold text-base text-white flex items-center gap-2">
+          <Star className="w-5 h-5 text-amber-400 fill-amber-400" />
+          Carga Mensual de Puntuación
+        </h3>
+        <p className="text-xs text-slate-400">
+          Registra la puntuación y volumen de reseñas de la sucursal para el mes seleccionado.
+        </p>
 
-            <form onSubmit={handleSaveReview} className="space-y-3.5">
-              <div>
-                <label className="text-xs font-bold text-slate-300">Sucursal:</label>
-                <select
-                  value={newForm.tienda}
-                  onChange={(e) => setNewForm({ ...newForm, tienda: e.target.value })}
-                  className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs sm:text-sm text-white focus:outline-none focus:border-amber-500"
-                >
-                  {stores.map((s) => (
-                    <option key={s.id} value={s.name}>{s.name}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="text-xs font-bold text-slate-300">Canal:</label>
-                <select
-                  value={newForm.canal}
-                  onChange={(e) => setNewForm({ ...newForm, canal: e.target.value })}
-                  className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs sm:text-sm text-white focus:outline-none focus:border-amber-500"
-                >
-                  {REVIEW_CHANNELS.map((c) => (
-                    <option key={c.id} value={c.id}>{c.label}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-xs font-bold text-slate-300">Puntuación Actual (1-5):</label>
-                  <input
-                    type="number"
-                    step="0.1"
-                    min="1"
-                    max="5"
-                    value={newForm.score}
-                    onChange={(e) => setNewForm({ ...newForm, score: e.target.value })}
-                    className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs sm:text-sm text-white focus:outline-none focus:border-amber-500 font-mono"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="text-xs font-bold text-slate-300">Mes Anterior:</label>
-                  <input
-                    type="number"
-                    step="0.1"
-                    min="1"
-                    max="5"
-                    value={newForm.prevScore}
-                    onChange={(e) => setNewForm({ ...newForm, prevScore: e.target.value })}
-                    className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs sm:text-sm text-white focus:outline-none focus:border-amber-500 font-mono"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="text-xs font-bold text-slate-300">Nuevas Reseñas Recibidas:</label>
-                <input
-                  type="number"
-                  min="0"
-                  value={newForm.count}
-                  onChange={(e) => setNewForm({ ...newForm, count: e.target.value })}
-                  className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs sm:text-sm text-white focus:outline-none focus:border-amber-500 font-mono"
-                  required
-                />
-              </div>
-
-              <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-800">
-                <button
-                  type="button"
-                  onClick={() => setShowAddModal(false)}
-                  className="px-4 py-2 text-xs font-bold text-slate-400 hover:text-white"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 text-xs font-bold bg-amber-500 hover:bg-amber-400 text-slate-950 rounded-xl transition-all shadow-md shadow-amber-500/20"
-                >
-                  Guardar Registro
-                </button>
-              </div>
-            </form>
+        <form onSubmit={handleSaveReview} className="space-y-3.5">
+          <div>
+            <label className="text-xs font-bold text-slate-300">Sucursal:</label>
+            <select
+              value={newForm.tienda}
+              onChange={(e) => setNewForm({ ...newForm, tienda: e.target.value })}
+              className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs sm:text-sm text-white focus:outline-none focus:border-amber-500"
+            >
+              {stores.map((s) => (
+                <option key={s.id} value={s.name}>{s.name}</option>
+              ))}
+            </select>
           </div>
-        </div>
-      )}
+
+          <div>
+            <label className="text-xs font-bold text-slate-300">Canal:</label>
+            <select
+              value={newForm.canal}
+              onChange={(e) => setNewForm({ ...newForm, canal: e.target.value })}
+              className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs sm:text-sm text-white focus:outline-none focus:border-amber-500"
+            >
+              {REVIEW_CHANNELS.map((c) => (
+                <option key={c.id} value={c.id}>{c.label}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="text-xs font-bold text-slate-300">Puntuación Actual (1-5):</label>
+              <input
+                type="number"
+                step="0.1"
+                min="1"
+                max="5"
+                value={newForm.score}
+                onChange={(e) => setNewForm({ ...newForm, score: e.target.value })}
+                className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs sm:text-sm text-white focus:outline-none focus:border-amber-500 font-mono"
+                required
+              />
+            </div>
+            <div>
+              <label className="text-xs font-bold text-slate-300">Mes Anterior:</label>
+              <input
+                type="number"
+                step="0.1"
+                min="1"
+                max="5"
+                value={newForm.prevScore}
+                onChange={(e) => setNewForm({ ...newForm, prevScore: e.target.value })}
+                className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs sm:text-sm text-white focus:outline-none focus:border-amber-500 font-mono"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="text-xs font-bold text-slate-300">Nuevas Reseñas Recibidas:</label>
+            <input
+              type="number"
+              min="0"
+              value={newForm.count}
+              onChange={(e) => setNewForm({ ...newForm, count: e.target.value })}
+              className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs sm:text-sm text-white focus:outline-none focus:border-amber-500 font-mono"
+              required
+            />
+          </div>
+
+          <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-800">
+            <button
+              type="button"
+              onClick={() => setShowAddModal(false)}
+              className="px-4 py-2 text-xs font-bold text-slate-400 hover:text-white"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              className="px-4 py-2 text-xs font-bold bg-amber-500 hover:bg-amber-400 text-slate-950 rounded-xl transition-all shadow-md shadow-amber-500/20"
+            >
+              Guardar Registro
+            </button>
+          </div>
+        </form>
+      </ModalWrapper>
     </div>
   );
 }

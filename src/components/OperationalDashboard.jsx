@@ -1,11 +1,14 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import { 
   TrendingUp, AlertTriangle, ArrowUpDown, Download, 
   CheckCircle2, Clock, AlertOctagon, DollarSign, ShieldAlert, 
-  Search, Users, Store, ArrowUpRight
+  Search
 } from 'lucide-react';
+import gsap from 'gsap';
+import { useGSAP } from '@gsap/react';
 import { fmtInt, fmtCurrency, fmtPct, getMetricStatus } from '../utils';
 import { CHANNELS } from '../config';
+import { AnimatedCounter } from './AnimatedCounter';
 
 export function OperationalDashboard({
   periodData,
@@ -22,6 +25,40 @@ export function OperationalDashboard({
   const [sortField, setSortField] = useState('confirmadas');
   const [sortAsc, setSortAsc] = useState(false);
   const [activeTab, setActiveTab] = useState('table'); // 'table' | 'grouped'
+
+  const containerRef = useRef(null);
+
+  // GSAP animation for filter bar and KPI cards
+  useGSAP(
+    () => {
+      const tl = gsap.timeline({ defaults: { ease: 'power2.out' } });
+      tl.fromTo(
+        '.op-filter-bar',
+        { opacity: 0, y: -8 },
+        { opacity: 1, y: 0, duration: 0.4 }
+      ).fromTo(
+        '.kpi-card',
+        { opacity: 0, y: 14, scale: 0.97 },
+        { opacity: 1, y: 0, scale: 1, duration: 0.45, stagger: 0.035 },
+        '-=0.2'
+      );
+    },
+    { scope: containerRef, dependencies: [selectedPeriod, selectedCanal, selectedSup] }
+  );
+
+  // GSAP animation when switching tabs
+  useGSAP(
+    () => {
+      if (containerRef.current) {
+        gsap.fromTo(
+          '.op-view-content',
+          { opacity: 0, y: 10 },
+          { opacity: 1, y: 0, duration: 0.35, ease: 'power2.out' }
+        );
+      }
+    },
+    { scope: containerRef, dependencies: [activeTab] }
+  );
 
   // Map stores to supervisor
   const storeMap = useMemo(() => {
@@ -225,9 +262,9 @@ export function OperationalDashboard({
   };
 
   return (
-    <div className="space-y-5 w-full">
+    <div ref={containerRef} className="space-y-5 w-full">
       {/* Filters Bar */}
-      <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-3.5 sm:p-4 shadow-xl">
+      <div className="op-filter-bar bg-slate-900/90 border border-slate-800 rounded-2xl p-3.5 sm:p-4 shadow-xl">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex flex-wrap items-center gap-3 sm:gap-4">
             {/* Period Selector */}
@@ -310,7 +347,7 @@ export function OperationalDashboard({
             </div>
             <button
               onClick={exportCSV}
-              className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-800/80 hover:bg-slate-750 border border-slate-700/80 text-xs font-bold text-slate-200 transition-all shadow-sm"
+              className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-800/80 hover:bg-slate-750 border border-slate-700/80 text-xs font-bold text-slate-200 transition-all duration-200 hover:-translate-y-0.5 active:scale-95 shadow-sm"
             >
               <Download className="w-3.5 h-3.5" />
               <span>Exportar</span>
@@ -319,10 +356,10 @@ export function OperationalDashboard({
         </div>
       </div>
 
-      {/* KPI Cards Grid */}
+      {/* KPI Cards Grid with GSAP Stagger and Animated Counters */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 font-mono-numbers">
         {/* Órdenes */}
-        <div className="bg-slate-900/90 border border-slate-800/90 rounded-2xl p-3.5 sm:p-4 hover:border-slate-700 transition shadow-lg">
+        <div className="kpi-card bg-slate-900/90 border border-slate-800/90 rounded-2xl p-3.5 sm:p-4 hover:-translate-y-1 hover:border-slate-700/80 hover:shadow-xl hover:shadow-black/40 transition-all duration-200 cursor-default shadow-lg">
           <div className="flex items-center justify-between text-xs text-slate-400 mb-1.5 font-sans">
             <span className="font-semibold">Órdenes Confirmadas</span>
             <div className="w-7 h-7 rounded-lg bg-blue-500/10 text-blue-400 flex items-center justify-center">
@@ -330,13 +367,13 @@ export function OperationalDashboard({
             </div>
           </div>
           <div className="text-xl sm:text-2xl font-black text-white">
-            {fmtInt(kpiSummary.totalOrders)}
+            <AnimatedCounter value={kpiSummary.totalOrders} decimals={0} />
           </div>
           <div className="text-[11px] text-slate-500 font-sans mt-0.5">Total en selección</div>
         </div>
 
         {/* Cancelaciones */}
-        <div className="bg-slate-900/90 border border-slate-800/90 rounded-2xl p-3.5 sm:p-4 hover:border-slate-700 transition shadow-lg">
+        <div className="kpi-card bg-slate-900/90 border border-slate-800/90 rounded-2xl p-3.5 sm:p-4 hover:-translate-y-1 hover:border-slate-700/80 hover:shadow-xl hover:shadow-black/40 transition-all duration-200 cursor-default shadow-lg">
           <div className="flex items-center justify-between text-xs text-slate-400 mb-1.5 font-sans">
             <span className="font-semibold">% Cancelaciones</span>
             <div className="w-7 h-7 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center">
@@ -344,13 +381,13 @@ export function OperationalDashboard({
             </div>
           </div>
           <div className="text-xl sm:text-2xl font-black text-white">
-            {fmtPct(kpiSummary.cancPct)}
+            <AnimatedCounter value={kpiSummary.cancPct} decimals={1} suffix="%" />
           </div>
           <div className="text-[11px] text-slate-500 font-sans mt-0.5">Objetivo: &le; 0.5%</div>
         </div>
 
         {/* Reclamos */}
-        <div className="bg-slate-900/90 border border-slate-800/90 rounded-2xl p-3.5 sm:p-4 hover:border-slate-700 transition shadow-lg">
+        <div className="kpi-card bg-slate-900/90 border border-slate-800/90 rounded-2xl p-3.5 sm:p-4 hover:-translate-y-1 hover:border-slate-700/80 hover:shadow-xl hover:shadow-black/40 transition-all duration-200 cursor-default shadow-lg">
           <div className="flex items-center justify-between text-xs text-slate-400 mb-1.5 font-sans">
             <span className="font-semibold">% Reclamos</span>
             <div className="w-7 h-7 rounded-lg bg-indigo-500/10 text-indigo-400 flex items-center justify-center">
@@ -358,13 +395,13 @@ export function OperationalDashboard({
             </div>
           </div>
           <div className="text-xl sm:text-2xl font-black text-white">
-            {fmtPct(kpiSummary.recPct)}
+            <AnimatedCounter value={kpiSummary.recPct} decimals={1} suffix="%" />
           </div>
           <div className="text-[11px] text-slate-500 font-sans mt-0.5">Objetivo: &le; 1.5%</div>
         </div>
 
         {/* Costo Reclamos */}
-        <div className="bg-slate-900/90 border border-slate-800/90 rounded-2xl p-3.5 sm:p-4 hover:border-slate-700 transition shadow-lg">
+        <div className="kpi-card bg-slate-900/90 border border-slate-800/90 rounded-2xl p-3.5 sm:p-4 hover:-translate-y-1 hover:border-slate-700/80 hover:shadow-xl hover:shadow-black/40 transition-all duration-200 cursor-default shadow-lg">
           <div className="flex items-center justify-between text-xs text-slate-400 mb-1.5 font-sans">
             <span className="font-semibold">Costo Reclamos</span>
             <div className="w-7 h-7 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
@@ -372,13 +409,13 @@ export function OperationalDashboard({
             </div>
           </div>
           <div className="text-xl sm:text-2xl font-black text-emerald-400">
-            {fmtCurrency(kpiSummary.recCosto)}
+            <AnimatedCounter value={kpiSummary.recCosto} decimals={0} prefix="$ " />
           </div>
           <div className="text-[11px] text-slate-500 font-sans mt-0.5">Impacto económico</div>
         </div>
 
         {/* Demoras */}
-        <div className="bg-slate-900/90 border border-slate-800/90 rounded-2xl p-3.5 sm:p-4 hover:border-slate-700 transition shadow-lg">
+        <div className="kpi-card bg-slate-900/90 border border-slate-800/90 rounded-2xl p-3.5 sm:p-4 hover:-translate-y-1 hover:border-slate-700/80 hover:shadow-xl hover:shadow-black/40 transition-all duration-200 cursor-default shadow-lg">
           <div className="flex items-center justify-between text-xs text-slate-400 mb-1.5 font-sans">
             <span className="font-semibold">% Demoras</span>
             <div className="w-7 h-7 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center">
@@ -386,13 +423,13 @@ export function OperationalDashboard({
             </div>
           </div>
           <div className="text-xl sm:text-2xl font-black text-white">
-            {fmtPct(kpiSummary.demPct)}
+            <AnimatedCounter value={kpiSummary.demPct} decimals={1} suffix="%" />
           </div>
           <div className="text-[11px] text-slate-500 font-sans mt-0.5">Objetivo: &le; 5.0%</div>
         </div>
 
         {/* Disponibilidad */}
-        <div className="bg-slate-900/90 border border-slate-800/90 rounded-2xl p-3.5 sm:p-4 hover:border-slate-700 transition shadow-lg">
+        <div className="kpi-card bg-slate-900/90 border border-slate-800/90 rounded-2xl p-3.5 sm:p-4 hover:-translate-y-1 hover:border-slate-700/80 hover:shadow-xl hover:shadow-black/40 transition-all duration-200 cursor-default shadow-lg">
           <div className="flex items-center justify-between text-xs text-slate-400 mb-1.5 font-sans">
             <span className="font-semibold">Disponibilidad</span>
             <div className="w-7 h-7 rounded-lg bg-teal-500/10 text-teal-400 flex items-center justify-center">
@@ -400,7 +437,7 @@ export function OperationalDashboard({
             </div>
           </div>
           <div className="text-xl sm:text-2xl font-black text-white">
-            {fmtPct(kpiSummary.dispAvg)}
+            <AnimatedCounter value={kpiSummary.dispAvg} decimals={1} suffix="%" />
           </div>
           <div className="text-[11px] text-slate-500 font-sans mt-0.5">Objetivo: &ge; 98.0%</div>
         </div>
@@ -441,7 +478,7 @@ export function OperationalDashboard({
 
       {/* View Content */}
       {activeTab === 'table' ? (
-        <div className="bg-slate-900/90 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl">
+        <div className="op-view-content bg-slate-900/90 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl">
           <div className="overflow-x-auto max-h-[700px]">
             <table className="w-full text-left border-collapse text-xs sm:text-sm">
               <thead className="sticky top-0 z-10 bg-slate-950/95 border-b border-slate-800 text-[11px] font-extrabold uppercase tracking-wider text-slate-400">
@@ -483,7 +520,7 @@ export function OperationalDashboard({
                   const dispStatus = getMetricStatus('disponibilidad', r.disponibilidad, thresholds);
 
                   return (
-                    <tr key={`${r.canal}-${r.tienda}-${idx}`} className="hover:bg-slate-800/40 transition-colors">
+                    <tr key={`${r.canal}-${r.tienda}-${idx}`} className="table-row-anim hover:bg-slate-800/40 transition-colors">
                       <td className="p-3.5 font-sans">
                         <span
                           className="px-2.5 py-0.5 rounded-full text-xs font-bold border"
@@ -598,9 +635,9 @@ export function OperationalDashboard({
         </div>
       ) : (
         /* Consolidated Grouped View by Supervisor */
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="op-view-content grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {supervisorGroups.map((g) => (
-            <div key={g.supervisor.id} className="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 space-y-4 shadow-xl">
+            <div key={g.supervisor.id} className="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 space-y-4 shadow-xl hover:-translate-y-1 hover:border-slate-700 transition-all duration-200">
               <div className="flex items-center justify-between border-b border-slate-800 pb-3">
                 <div>
                   <h3 className="font-extrabold text-base text-white">{g.supervisor.name}</h3>

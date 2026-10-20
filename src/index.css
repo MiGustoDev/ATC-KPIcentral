@@ -13,11 +13,36 @@
     color: #f8fafc;
     min-height: 100vh;
     overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
   
   .font-mono-numbers {
     font-family: var(--font-mono);
     font-variant-numeric: tabular-nums;
+  }
+}
+
+/* GPU hardware acceleration helpers for silky GSAP tweens */
+.kpi-card,
+.rev-metric-card,
+.op-filter-bar,
+.rev-filter-bar,
+.op-view-content,
+.table-row-anim,
+.rev-row-anim {
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+}
+
+/* Accessibility: respect reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
 

@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { 
   BarChart3, LayoutDashboard, Star, Upload, 
   SlidersHorizontal, Sparkles
 } from 'lucide-react';
+import gsap from 'gsap';
+import { useGSAP } from '@gsap/react';
 
 export function Header({
   activeModule,
@@ -10,11 +12,23 @@ export function Header({
   onOpenImport,
   onOpenThresholds
 }) {
+  const headerRef = useRef(null);
+
+  useGSAP(
+    () => {
+      const tl = gsap.timeline({ defaults: { ease: 'power2.out' } });
+      tl.from('.header-brand', { opacity: 0, x: -12, duration: 0.45 })
+        .from('.header-nav', { opacity: 0, y: -6, duration: 0.4 }, '-=0.25')
+        .from('.header-actions', { opacity: 0, x: 12, duration: 0.4 }, '-=0.3');
+    },
+    { scope: headerRef }
+  );
+
   return (
-    <header className="sticky top-0 z-30 backdrop-blur-md bg-slate-950/85 border-b border-slate-800/80">
+    <header ref={headerRef} className="sticky top-0 z-30 backdrop-blur-md bg-slate-950/85 border-b border-slate-800/80">
       <div className="w-full px-4 sm:px-8 py-3 flex flex-wrap items-center justify-between gap-4">
         {/* Brand with official Logo */}
-        <div className="flex items-center gap-3.5">
+        <div className="header-brand flex items-center gap-3.5">
           <img
             src="/Logo_Mi_Gusto_2025.png"
             alt="Mi Gusto"
@@ -37,13 +51,13 @@ export function Header({
         </div>
 
         {/* Navigation Tabs */}
-        <div className="inline-flex rounded-xl bg-slate-900/90 p-1 border border-slate-800 shadow-inner">
+        <div className="header-nav inline-flex rounded-xl bg-slate-900/90 p-1 border border-slate-800 shadow-inner">
           <button
             onClick={() => onModuleChange('operational')}
-            className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
+            className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all duration-200 active:scale-95 ${
               activeModule === 'operational'
                 ? 'bg-amber-500 text-slate-950 shadow-md shadow-amber-500/20'
-                : 'text-slate-400 hover:text-slate-200'
+                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
             }`}
           >
             <LayoutDashboard className="w-3.5 h-3.5" />
@@ -51,10 +65,10 @@ export function Header({
           </button>
           <button
             onClick={() => onModuleChange('reviews')}
-            className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
+            className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all duration-200 active:scale-95 ${
               activeModule === 'reviews'
                 ? 'bg-amber-500 text-slate-950 shadow-md shadow-amber-500/20'
-                : 'text-slate-400 hover:text-slate-200'
+                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
             }`}
           >
             <Star className="w-3.5 h-3.5" />
@@ -63,10 +77,10 @@ export function Header({
         </div>
 
         {/* Quick Actions */}
-        <div className="flex items-center gap-2.5">
+        <div className="header-actions flex items-center gap-2.5">
           <button
             onClick={onOpenThresholds}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-850 border border-slate-800 hover:border-amber-500/40 text-xs font-semibold text-slate-300 transition-all shadow-sm"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-850 border border-slate-800 hover:border-amber-500/40 text-xs font-semibold text-slate-300 transition-all duration-200 hover:-translate-y-0.5 active:scale-95 shadow-sm"
           >
             <SlidersHorizontal className="w-3.5 h-3.5 text-amber-400" />
             <span>Semáforos</span>
@@ -74,7 +88,7 @@ export function Header({
 
           <button
             onClick={onOpenImport}
-            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-850 border border-slate-800 hover:border-emerald-500/40 text-xs font-semibold text-emerald-400 transition-all shadow-sm"
+            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-850 border border-slate-800 hover:border-emerald-500/40 text-xs font-semibold text-emerald-400 transition-all duration-200 hover:-translate-y-0.5 active:scale-95 shadow-sm"
           >
             <Upload className="w-3.5 h-3.5" />
             <span>Importar Excel</span>

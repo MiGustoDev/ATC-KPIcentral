@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
 import { Sliders, CheckCircle2, RotateCcw } from 'lucide-react';
 import { INITIAL_THRESHOLDS } from '../config';
+import { ModalWrapper } from './ModalWrapper';
 
 export function ThresholdsModal({ isOpen, onClose, thresholds, onSaveThresholds }) {
   const [current, setCurrent] = useState({ ...thresholds });
-
-  if (!isOpen) return null;
 
   const handleChange = (key, field, val) => {
     setCurrent({
@@ -28,8 +27,11 @@ export function ThresholdsModal({ isOpen, onClose, thresholds, onSaveThresholds 
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-fade-in">
-      <div className="glass-panel max-w-lg w-full p-6 space-y-5 bg-slate-900 border-slate-700">
+    <ModalWrapper
+      isOpen={isOpen}
+      onClose={onClose}
+      className="max-w-lg w-full p-6 space-y-5 bg-slate-900 border border-slate-700/80 rounded-2xl shadow-2xl"
+    >
         <div className="flex items-center justify-between border-b border-slate-800 pb-3">
           <div className="flex items-center gap-2">
             <Sliders className="w-5 h-5 text-blue-400" />
@@ -179,7 +181,6 @@ export function ThresholdsModal({ isOpen, onClose, thresholds, onSaveThresholds 
             </div>
           </div>
         </form>
-      </div>
-    </div>
+    </ModalWrapper>
   );
 }
