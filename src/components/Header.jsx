@@ -25,39 +25,43 @@ export function Header({
   );
 
   return (
-    <header ref={headerRef} className="sticky top-0 z-30 backdrop-blur-md bg-slate-950/85 border-b border-slate-800/80">
-      <div className="w-full px-4 sm:px-8 py-3 flex flex-wrap items-center justify-between gap-4">
+    <header ref={headerRef} className="sticky top-0 z-40 backdrop-blur-xl bg-slate-950/75 border-b border-slate-800/70 shadow-sm">
+      <div className="w-full px-4 sm:px-8 py-2.5 flex flex-wrap items-center justify-between gap-4">
         {/* Brand with official Logo */}
         <div className="header-brand flex items-center gap-3.5">
-          <img
-            src="/Logo_Mi_Gusto_2025.png"
-            alt="Mi Gusto"
-            className="h-8 sm:h-9 w-auto object-contain brightness-110 drop-shadow-[0_2px_12px_rgba(245,158,11,0.2)]"
-          />
-          <div className="h-6 w-px bg-slate-800 hidden sm:block" />
+          <div className="relative group">
+            <div className="absolute -inset-1 rounded-xl bg-amber-500/20 blur-md opacity-40 group-hover:opacity-75 transition duration-500" />
+            <img
+              src="/Logo_Mi_Gusto_2025.png"
+              alt="Mi Gusto"
+              className="relative h-8 sm:h-9 w-auto object-contain brightness-110 drop-shadow-[0_2px_12px_rgba(245,158,11,0.25)]"
+            />
+          </div>
+          <div className="h-6 w-px bg-slate-800/80 hidden sm:block" />
           <div>
             <div className="flex items-center gap-2">
               <span className="font-extrabold text-sm sm:text-base tracking-tight text-white">
                 KPI Central
               </span>
-              <span className="text-[10px] font-extrabold uppercase tracking-widest px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20 shadow-sm">
+              <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-300 border border-amber-500/20 shadow-sm shadow-amber-950/20 flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
                 Apps & Calidad
               </span>
             </div>
-            <p className="text-[11px] text-slate-400 hidden sm:block">
+            <p className="text-[11px] text-slate-400 hidden sm:block font-medium">
               Monitoreo operativo de PedidosYa, Rappi, MDL y Reseñas
             </p>
           </div>
         </div>
 
-        {/* Navigation Tabs */}
-        <div className="header-nav inline-flex rounded-xl bg-slate-900/90 p-1 border border-slate-800 shadow-inner">
+        {/* Navigation Tabs - Modern Segmented Control */}
+        <div className="header-nav inline-flex rounded-2xl bg-slate-900/80 p-1 border border-slate-800/80 shadow-inner">
           <button
             onClick={() => onModuleChange('operational')}
-            className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all duration-200 active:scale-95 ${
+            className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all duration-200 cursor-pointer ${
               activeModule === 'operational'
-                ? 'bg-amber-500 text-slate-950 shadow-md shadow-amber-500/20'
-                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+                ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 shadow-md shadow-amber-500/25 scale-[1.01]'
+                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40'
             }`}
           >
             <LayoutDashboard className="w-3.5 h-3.5" />
@@ -65,10 +69,10 @@ export function Header({
           </button>
           <button
             onClick={() => onModuleChange('reviews')}
-            className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all duration-200 active:scale-95 ${
+            className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all duration-200 cursor-pointer ${
               activeModule === 'reviews'
-                ? 'bg-amber-500 text-slate-950 shadow-md shadow-amber-500/20'
-                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+                ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 shadow-md shadow-amber-500/25 scale-[1.01]'
+                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40'
             }`}
           >
             <Star className="w-3.5 h-3.5" />
@@ -80,7 +84,7 @@ export function Header({
         <div className="header-actions flex items-center gap-2.5">
           <button
             onClick={onOpenThresholds}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-850 border border-slate-800 hover:border-amber-500/40 text-xs font-semibold text-slate-300 transition-all duration-200 hover:-translate-y-0.5 active:scale-95 shadow-sm"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-900/80 hover:bg-slate-800 border border-slate-800/90 hover:border-amber-500/40 text-xs font-semibold text-slate-300 hover:text-white transition-all duration-200 hover:-translate-y-0.5 active:scale-95 shadow-sm cursor-pointer"
           >
             <SlidersHorizontal className="w-3.5 h-3.5 text-amber-400" />
             <span>Semáforos</span>
@@ -88,7 +92,7 @@ export function Header({
 
           <button
             onClick={onOpenImport}
-            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-850 border border-slate-800 hover:border-emerald-500/40 text-xs font-semibold text-emerald-400 transition-all duration-200 hover:-translate-y-0.5 active:scale-95 shadow-sm"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-900/80 hover:bg-slate-800 border border-slate-800/90 hover:border-emerald-500/40 text-xs font-semibold text-emerald-400 hover:text-emerald-300 transition-all duration-200 hover:-translate-y-0.5 active:scale-95 shadow-sm cursor-pointer"
           >
             <Upload className="w-3.5 h-3.5" />
             <span>Importar Excel</span>

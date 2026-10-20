@@ -79,7 +79,7 @@ export function CustomSelect({
       <button
         type="button"
         onClick={() => setIsOpen((prev) => !prev)}
-        className={`inline-flex items-center justify-between gap-2.5 bg-slate-950 border border-slate-800 hover:border-amber-500/50 text-white text-xs sm:text-sm font-semibold rounded-xl px-3.5 py-2 transition-all duration-200 cursor-pointer shadow-sm hover:shadow-md hover:shadow-black/40 focus:outline-none focus:border-amber-500 ${className}`}
+        className={`inline-flex items-center justify-between gap-2.5 bg-slate-950/80 border border-slate-800 hover:border-slate-750 text-white text-xs sm:text-sm font-semibold rounded-xl px-3.5 py-2 transition-all duration-200 cursor-pointer shadow-sm hover:shadow-md hover:shadow-black/40 focus:outline-none focus:border-amber-500/70 focus:ring-2 focus:ring-amber-500/15 ${className}`}
       >
         <div className="flex items-center gap-2 truncate">
           {Icon && <Icon className="w-3.5 h-3.5 text-slate-400 shrink-0" />}
@@ -102,7 +102,7 @@ export function CustomSelect({
       {isOpen && (
         <div
           ref={menuRef}
-          className={`absolute left-0 mt-1.5 min-w-[240px] w-full max-h-72 overflow-y-auto no-scrollbar z-50 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl shadow-black p-1.5 space-y-0.5 font-sans ring-1 ring-white/10 ${dropdownClassName}`}
+          className={`absolute left-0 mt-1.5 min-w-[240px] w-full max-h-72 overflow-y-auto no-scrollbar z-50 bg-slate-900 border border-slate-700/80 rounded-2xl shadow-2xl shadow-black p-1.5 space-y-1 font-sans ring-1 ring-white/10 ${dropdownClassName}`}
         >
           {normalizedOptions.map((opt) => {
             const isSelected = opt.value === value;
@@ -111,7 +111,7 @@ export function CustomSelect({
                 key={opt.value}
                 type="button"
                 onClick={() => handleSelect(opt.value)}
-                className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs sm:text-sm text-left transition-all duration-150 cursor-pointer ${
+                className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs sm:text-sm text-left transition-all duration-150 cursor-pointer ${
                   isSelected
                     ? 'bg-amber-500/15 text-amber-300 font-bold border border-amber-500/25 shadow-sm'
                     : 'text-slate-300 hover:bg-slate-800/80 hover:text-white'

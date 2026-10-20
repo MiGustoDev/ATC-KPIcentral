@@ -202,14 +202,14 @@ export function ReviewsDashboard({ supervisors, stores }) {
   };
 
   return (
-    <div ref={reviewsContainerRef} className="space-y-5 w-full">
+    <div ref={reviewsContainerRef} className="space-y-6 w-full">
       {/* Filter Bar */}
-      <div className="rev-filter-bar relative z-30 bg-slate-900/90 border border-slate-800 rounded-2xl p-3.5 sm:p-4 shadow-xl">
+      <div className="rev-filter-bar relative z-30 glass-panel rounded-2xl p-4 sm:p-5 shadow-2xl">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex flex-wrap items-center gap-3 sm:gap-4">
             {/* Month */}
             <div className="flex items-center gap-2">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Mes:</span>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Mes</span>
               <CustomSelect
                 value={selectedMonth}
                 onChange={setSelectedMonth}
@@ -219,16 +219,16 @@ export function ReviewsDashboard({ supervisors, stores }) {
               />
             </div>
 
-            {/* Canal Switcher */}
+            {/* Canal Switcher - Modern Segmented Control */}
             <div className="flex items-center gap-2">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Canal:</span>
-              <div className="inline-flex rounded-xl bg-slate-950 p-1 border border-slate-800">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Canal</span>
+              <div className="inline-flex rounded-xl bg-slate-950/80 p-1 border border-slate-800/80 shadow-inner">
                 <button
                   onClick={() => setSelectedCanal('ALL')}
-                  className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${
+                  className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all duration-200 cursor-pointer ${
                     selectedCanal === 'ALL'
-                      ? 'bg-amber-500 text-slate-950 shadow-sm'
-                      : 'text-slate-400 hover:text-white'
+                      ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 shadow-md shadow-amber-500/20'
+                      : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40'
                   }`}
                 >
                   Todos (5)
@@ -237,10 +237,10 @@ export function ReviewsDashboard({ supervisors, stores }) {
                   <button
                     key={c.id}
                     onClick={() => setSelectedCanal(c.id)}
-                    className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${
+                    className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all duration-200 cursor-pointer ${
                       selectedCanal === c.id
-                        ? 'bg-amber-500 text-slate-950 shadow-sm'
-                        : 'text-slate-400 hover:text-white'
+                        ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 shadow-md shadow-amber-500/20'
+                        : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40'
                     }`}
                   >
                     {c.label}
@@ -251,7 +251,7 @@ export function ReviewsDashboard({ supervisors, stores }) {
 
             {/* Supervisora */}
             <div className="flex items-center gap-2">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Supervisora:</span>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Supervisora</span>
               <CustomSelect
                 value={selectedSup}
                 onChange={setSelectedSup}
@@ -271,19 +271,27 @@ export function ReviewsDashboard({ supervisors, stores }) {
 
           <div className="flex items-center gap-3">
             <div className="relative">
-              <Search className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
+              <Search className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
               <input
                 type="text"
                 placeholder="Buscar sucursal..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="bg-slate-950 border border-slate-800 rounded-xl pl-9 pr-3 py-2 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 transition-all w-44 sm:w-52"
+                className="bg-slate-950/80 border border-slate-800 hover:border-slate-700/80 focus:border-amber-500/70 focus:ring-2 focus:ring-amber-500/15 rounded-xl pl-9 pr-8 py-2 text-xs sm:text-sm text-white placeholder-slate-500 transition-all duration-200 w-44 sm:w-52 focus:outline-none shadow-inner"
               />
+              {searchTerm && (
+                <button
+                  onClick={() => setSearchTerm('')}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 text-xs cursor-pointer"
+                >
+                  &times;
+                </button>
+              )}
             </div>
 
             <button
               onClick={() => setShowAddModal(true)}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-extrabold shadow-lg shadow-amber-500/20 transition-all duration-200 hover:-translate-y-0.5 active:scale-95"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 text-xs font-bold shadow-lg shadow-amber-500/20 transition-all duration-200 hover:-translate-y-0.5 active:scale-95 cursor-pointer"
             >
               <Plus className="w-4 h-4" />
               <span>Carga Mensual</span>
@@ -292,68 +300,84 @@ export function ReviewsDashboard({ supervisors, stores }) {
         </div>
       </div>
 
-      {/* Metrics Row with GSAP Stagger and Animated Counters */}
-      <div className="relative z-10 grid grid-cols-1 sm:grid-cols-3 gap-3 font-mono-numbers">
+      {/* Metrics Row - Modern Glass Cards */}
+      <div className="relative z-10 grid grid-cols-1 sm:grid-cols-3 gap-3.5 font-mono-numbers">
         {/* Puntuación Promedio */}
-        <div className="rev-metric-card bg-slate-900/90 border border-slate-800/90 rounded-2xl p-4 shadow-lg hover:-translate-y-1 hover:border-slate-700/80 hover:shadow-xl hover:shadow-black/40 transition-all duration-200 cursor-default">
-          <div className="flex items-center justify-between text-xs text-slate-400 mb-1.5 font-sans">
-            <span className="font-semibold">Puntuación Promedio General</span>
-            <div className="w-7 h-7 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center">
+        <div className="rev-metric-card glass-card rounded-2xl p-4 sm:p-5 shadow-lg hover:-translate-y-1 hover:border-amber-500/40 transition-all duration-200 cursor-default group">
+          <div className="flex items-center justify-between text-xs text-slate-400 mb-2 font-sans">
+            <span className="font-semibold text-slate-300">Puntuación Promedio General</span>
+            <div className="w-7 h-7 rounded-lg bg-amber-500/15 text-amber-400 flex items-center justify-center ring-1 ring-amber-500/25 group-hover:scale-110 transition-transform">
               <Star className="w-4 h-4 fill-amber-400" />
             </div>
           </div>
-          <div className="text-2xl sm:text-3xl font-black text-white flex items-baseline gap-2">
+          <div className="text-2xl sm:text-3xl font-black text-white flex items-baseline gap-2 tracking-tight">
             <AnimatedCounter value={parseFloat(summary.avgScore) || 0} decimals={2} />
             <span className="text-sm font-semibold text-slate-500">/ 5.00</span>
           </div>
-          <div className="text-[11px] text-slate-500 font-sans mt-0.5">Ponderado por volumen de reseñas</div>
+          <div className="mt-2 font-sans">
+            <span className="inline-flex items-center text-[11px] font-medium text-slate-400">
+              Ponderado por volumen de reseñas
+            </span>
+          </div>
         </div>
 
         {/* Reseñas Nuevas */}
-        <div className="rev-metric-card bg-slate-900/90 border border-slate-800/90 rounded-2xl p-4 shadow-lg hover:-translate-y-1 hover:border-slate-700/80 hover:shadow-xl hover:shadow-black/40 transition-all duration-200 cursor-default">
-          <div className="flex items-center justify-between text-xs text-slate-400 mb-1.5 font-sans">
-            <span className="font-semibold">Total Nuevas Reseñas</span>
-            <div className="w-7 h-7 rounded-lg bg-blue-500/10 text-blue-400 flex items-center justify-center">
+        <div className="rev-metric-card glass-card rounded-2xl p-4 sm:p-5 shadow-lg hover:-translate-y-1 hover:border-blue-500/40 transition-all duration-200 cursor-default group">
+          <div className="flex items-center justify-between text-xs text-slate-400 mb-2 font-sans">
+            <span className="font-semibold text-slate-300">Total Nuevas Reseñas</span>
+            <div className="w-7 h-7 rounded-lg bg-blue-500/15 text-blue-400 flex items-center justify-center ring-1 ring-blue-500/25 group-hover:scale-110 transition-transform">
               <MessageSquare className="w-3.5 h-3.5" />
             </div>
           </div>
-          <div className="text-2xl sm:text-3xl font-black text-white">
+          <div className="text-2xl sm:text-3xl font-black text-white tracking-tight">
             <AnimatedCounter value={summary.totalReviews} decimals={0} />
           </div>
-          <div className="text-[11px] text-slate-500 font-sans mt-0.5">Relevadas en el mes actual</div>
+          <div className="mt-2 font-sans">
+            <span className="inline-flex items-center text-[11px] font-medium text-slate-400">
+              Relevadas en el mes actual
+            </span>
+          </div>
         </div>
 
         {/* Alertas de Caída */}
-        <div className="rev-metric-card bg-slate-900/90 border border-slate-800/90 rounded-2xl p-4 shadow-lg hover:-translate-y-1 hover:border-slate-700/80 hover:shadow-xl hover:shadow-black/40 transition-all duration-200 cursor-default">
-          <div className="flex items-center justify-between text-xs text-slate-400 mb-1.5 font-sans">
-            <span className="font-semibold">Alertas por Caída de Calificación</span>
-            <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${
-              summary.dropCount > 0 ? 'bg-rose-500/10 text-rose-400' : 'bg-emerald-500/10 text-emerald-400'
-            }`}>
+        <div className="rev-metric-card glass-card rounded-2xl p-4 sm:p-5 shadow-lg hover:-translate-y-1 hover:border-rose-500/40 transition-all duration-200 cursor-default group">
+          <div className="flex items-center justify-between text-xs text-slate-400 mb-2 font-sans">
+            <span className="font-semibold text-slate-300">Alertas por Caída de Calificación</span>
+            <div
+              className={`w-7 h-7 rounded-lg flex items-center justify-center ring-1 transition-transform group-hover:scale-110 ${
+                summary.dropCount > 0
+                  ? 'bg-rose-500/15 text-rose-400 ring-rose-500/25'
+                  : 'bg-emerald-500/15 text-emerald-400 ring-emerald-500/25'
+              }`}
+            >
               <AlertTriangle className="w-3.5 h-3.5" />
             </div>
           </div>
-          <div className={`text-2xl sm:text-3xl font-black ${summary.dropCount > 0 ? 'text-rose-400' : 'text-emerald-400'}`}>
+          <div className={`text-2xl sm:text-3xl font-black tracking-tight ${summary.dropCount > 0 ? 'text-rose-400' : 'text-emerald-400'}`}>
             <AnimatedCounter value={summary.dropCount} decimals={0} />
           </div>
-          <div className="text-[11px] text-slate-500 font-sans mt-0.5">Sucursales con baja &ge; 0.15 pts</div>
+          <div className="mt-2 font-sans">
+            <span className="inline-flex items-center text-[11px] font-medium text-slate-400">
+              Sucursales con baja &ge; 0.15 pts
+            </span>
+          </div>
         </div>
       </div>
 
       {/* Reviews Table */}
-      <div className="rev-table-container bg-slate-900/90 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl">
-        <div className="p-3.5 sm:p-4 border-b border-slate-800 flex flex-wrap items-center justify-between gap-2">
+      <div className="rev-table-container glass-panel rounded-2xl overflow-hidden shadow-2xl border border-slate-800/80">
+        <div className="px-4 py-3.5 border-b border-slate-800/80 flex flex-wrap items-center justify-between gap-2 bg-slate-950/60">
           <h3 className="font-bold text-xs sm:text-sm text-white">
             Puntuaciones Relevadas ({filteredItems.length} registros)
           </h3>
           <span className="text-xs text-slate-400 font-medium">
-            PedidosYa • Rappi • Mercado Delivery • TePido • Google Maps
+            PedidosYa &bull; Rappi &bull; Mercado Delivery &bull; TePido &bull; Google Maps
           </span>
         </div>
 
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse text-xs sm:text-sm">
-            <thead className="sticky top-0 z-10 bg-slate-950/95 border-b border-slate-800 text-[11px] font-extrabold uppercase tracking-wider text-slate-400">
+            <thead className="sticky top-0 z-10 bg-slate-950/90 backdrop-blur-md border-b border-slate-800/80 text-[11px] font-bold uppercase tracking-wider text-slate-400 select-none">
               <tr>
                 <th className="p-3.5">Canal</th>
                 <th className="p-3.5">Sucursal</th>
@@ -365,34 +389,55 @@ export function ReviewsDashboard({ supervisors, stores }) {
                 <th className="p-3.5 text-center">Estado</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/60 font-mono-numbers">
+            <tbody className="divide-y divide-slate-800/50 font-mono-numbers">
               {filteredItems.map((item, idx) => {
                 const supId = storeMap[item.tienda.toLowerCase()];
                 const sup = supervisorMap[supId];
-                const diff = item.prevScore ? (item.score - item.prevScore) : 0;
+                const diff = item.prevScore ? item.score - item.prevScore : 0;
                 const isDrop = diff < -0.15;
                 const isGain = diff > 0.05;
 
                 return (
-                  <tr key={`${item.tienda}-${item.canal}-${idx}`} className="rev-row-anim hover:bg-slate-800/40 transition-colors">
+                  <tr
+                    key={`${item.tienda}-${item.canal}-${idx}`}
+                    className="rev-row-anim hover:bg-slate-800/40 transition-colors duration-150"
+                  >
                     <td className="p-3.5 font-sans">
-                      <span className="px-2.5 py-0.5 rounded-full text-xs font-bold border bg-slate-800 text-slate-300 border-slate-700">
+                      <span
+                        className={`inline-flex items-center px-3 py-1 rounded-full text-xs tracking-wide shadow-sm ${
+                          item.canal === 'PedidosYa'
+                            ? 'bg-red-500 text-white font-bold border border-red-400/40 shadow-red-950/40'
+                            : item.canal === 'Rappi'
+                            ? 'bg-orange-500 text-white font-bold border border-orange-400/40 shadow-orange-950/40'
+                            : item.canal === 'Mercado Delivery'
+                            ? 'bg-amber-500 text-white font-bold border border-amber-400/50 shadow-amber-950/40'
+                            : item.canal === 'TePido'
+                            ? 'bg-purple-500 text-white font-bold border border-purple-400/40 shadow-purple-950/40'
+                            : 'bg-sky-500 text-white font-bold border border-sky-400/40 shadow-sky-950/40'
+                        }`}
+                      >
                         {item.canal}
                       </span>
                     </td>
-                    <td className="p-3.5 font-sans font-bold text-white">{item.tienda}</td>
+                    <td className="p-3.5 font-sans font-bold text-white text-sm">
+                      {item.tienda}
+                    </td>
                     <td className="p-3.5 font-sans">
                       {sup ? (
-                        <span className="text-xs px-2.5 py-1 rounded-lg font-bold bg-slate-800 text-slate-300 border border-slate-700/60">
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-800/70 text-slate-200 border border-slate-700/60 shadow-sm">
+                          <span
+                            className="w-2 h-2 rounded-full shadow-sm shrink-0"
+                            style={{ backgroundColor: sup.color }}
+                          />
                           {sup.name}
                         </span>
                       ) : (
-                        <span className="text-xs text-slate-500">Sin asignar</span>
+                        <span className="text-xs text-slate-500 italic">Sin asignar</span>
                       )}
                     </td>
-                    <td className="p-3.5 text-right font-black text-white">
+                    <td className="p-3.5 text-right font-black text-white text-sm">
                       <div className="inline-flex items-center gap-1.5">
-                        <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
+                        <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400 drop-shadow-[0_1px_4px_rgba(245,158,11,0.4)]" />
                         <span>{item.score.toFixed(1)}</span>
                       </div>
                     </td>
@@ -401,10 +446,20 @@ export function ReviewsDashboard({ supervisors, stores }) {
                     </td>
                     <td className="p-3.5 text-right font-bold">
                       {item.prevScore ? (
-                        <div className={`inline-flex items-center gap-0.5 text-xs ${
-                          diff < 0 ? 'text-rose-400' : diff > 0 ? 'text-emerald-400' : 'text-slate-400'
-                        }`}>
-                          {diff > 0 ? <ArrowUpRight className="w-3 h-3" /> : diff < 0 ? <ArrowDownRight className="w-3 h-3" /> : null}
+                        <div
+                          className={`inline-flex items-center gap-0.5 text-xs ${
+                            diff < 0
+                              ? 'text-rose-400'
+                              : diff > 0
+                              ? 'text-emerald-400'
+                              : 'text-slate-400'
+                          }`}
+                        >
+                          {diff > 0 ? (
+                            <ArrowUpRight className="w-3 h-3" />
+                          ) : diff < 0 ? (
+                            <ArrowDownRight className="w-3 h-3" />
+                          ) : null}
                           <span>{diff > 0 ? `+${diff.toFixed(2)}` : diff.toFixed(2)}</span>
                         </div>
                       ) : (
@@ -416,17 +471,17 @@ export function ReviewsDashboard({ supervisors, stores }) {
                     </td>
                     <td className="p-3.5 text-center font-sans">
                       {isDrop ? (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-500/10 text-rose-400 border border-rose-500/20">
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-500/10 text-rose-400 border border-rose-500/25 shadow-sm">
                           <AlertTriangle className="w-3 h-3" />
                           Alerta Caída
                         </span>
                       ) : isGain ? (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/25 shadow-sm">
                           <TrendingUp className="w-3 h-3" />
                           En alza
                         </span>
                       ) : (
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-800 text-slate-400 border border-slate-700">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-800/80 text-slate-400 border border-slate-700/60">
                           Estable
                         </span>
                       )}

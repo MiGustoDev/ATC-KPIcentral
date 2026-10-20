@@ -8,8 +8,6 @@ export function ImportModal({ isOpen, onClose, onImportSuccess }) {
   const [errorMsg, setErrorMsg] = useState(null);
   const [successInfo, setSuccessInfo] = useState(null);
 
-  if (!isOpen) return null;
-
   const handleFileUpload = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -119,25 +117,25 @@ export function ImportModal({ isOpen, onClose, onImportSuccess }) {
         </div>
       )}
 
-      <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-800">
-        <button
-          type="button"
-          onClick={onClose}
-          className="px-4 py-2 text-xs font-semibold text-slate-400 hover:text-slate-200 transition-colors"
-        >
-          Cancelar
-        </button>
+      <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-800">
         <button
           type="button"
           onClick={handleConfirm}
           disabled={!successInfo || isProcessing}
-          className={`px-4 py-2 text-xs font-semibold rounded-lg transition-all ${
+          className={`px-4 py-2 text-xs font-bold rounded-xl transition-all shadow-md active:scale-95 ${
             successInfo && !isProcessing
-              ? 'bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-500/20'
-              : 'bg-slate-800 text-slate-600 cursor-not-allowed'
+              ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-white shadow-emerald-950/40 cursor-pointer'
+              : 'bg-slate-800 text-slate-500 cursor-not-allowed opacity-60'
           }`}
         >
           Confirmar e Incorporar al Historial
+        </button>
+        <button
+          type="button"
+          onClick={onClose}
+          className="px-4 py-2 text-xs font-semibold text-slate-400 hover:text-slate-200 transition-colors cursor-pointer"
+        >
+          Cancelar
         </button>
       </div>
     </ModalWrapper>
