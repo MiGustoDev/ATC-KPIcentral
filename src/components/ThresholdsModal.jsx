@@ -48,7 +48,7 @@ export function ThresholdsModal({ isOpen, onClose, thresholds, onSaveThresholds 
 
         <form onSubmit={handleSave} className="space-y-4">
           {/* Cancelaciones % */}
-          <div className="p-3.5 rounded-lg bg-slate-950/60 border border-slate-800 space-y-2">
+          <div className="p-3.5 rounded-xl bg-slate-950/60 border border-slate-800 space-y-2">
             <div className="text-xs font-bold text-slate-200">Cancelaciones (%)</div>
             <div className="grid grid-cols-2 gap-3 text-xs">
               <div>
@@ -58,7 +58,7 @@ export function ThresholdsModal({ isOpen, onClose, thresholds, onSaveThresholds 
                   step="0.1"
                   value={current.cancelacionesPct.ok}
                   onChange={(e) => handleChange('cancelacionesPct', 'ok', e.target.value)}
-                  className="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1.5 text-slate-100 text-sm"
+                  className="w-full bg-slate-900 border border-slate-700 focus:border-amber-500 focus:outline-none rounded-xl px-3 py-2 text-slate-100 text-sm font-mono [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none transition-all"
                 />
               </div>
               <div>
@@ -68,14 +68,14 @@ export function ThresholdsModal({ isOpen, onClose, thresholds, onSaveThresholds 
                   step="0.1"
                   value={current.cancelacionesPct.warning}
                   onChange={(e) => handleChange('cancelacionesPct', 'warning', e.target.value)}
-                  className="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1.5 text-slate-100 text-sm"
+                  className="w-full bg-slate-900 border border-slate-700 focus:border-amber-500 focus:outline-none rounded-xl px-3 py-2 text-slate-100 text-sm font-mono [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none transition-all"
                 />
               </div>
             </div>
           </div>
 
           {/* Reclamos % */}
-          <div className="p-3.5 rounded-lg bg-slate-950/60 border border-slate-800 space-y-2">
+          <div className="p-3.5 rounded-xl bg-slate-950/60 border border-slate-800 space-y-2">
             <div className="text-xs font-bold text-slate-200">Reclamos (%)</div>
             <div className="grid grid-cols-2 gap-3 text-xs">
               <div>
@@ -85,7 +85,7 @@ export function ThresholdsModal({ isOpen, onClose, thresholds, onSaveThresholds 
                   step="0.1"
                   value={current.reclamosPct.ok}
                   onChange={(e) => handleChange('reclamosPct', 'ok', e.target.value)}
-                  className="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1.5 text-slate-100 text-sm"
+                  className="w-full bg-slate-900 border border-slate-700 focus:border-amber-500 focus:outline-none rounded-xl px-3 py-2 text-slate-100 text-sm font-mono [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none transition-all"
                 />
               </div>
               <div>
@@ -95,14 +95,14 @@ export function ThresholdsModal({ isOpen, onClose, thresholds, onSaveThresholds 
                   step="0.1"
                   value={current.reclamosPct.warning}
                   onChange={(e) => handleChange('reclamosPct', 'warning', e.target.value)}
-                  className="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1.5 text-slate-100 text-sm"
+                  className="w-full bg-slate-900 border border-slate-700 focus:border-amber-500 focus:outline-none rounded-xl px-3 py-2 text-slate-100 text-sm font-mono [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none transition-all"
                 />
               </div>
             </div>
           </div>
 
           {/* Demoras % */}
-          <div className="p-3.5 rounded-lg bg-slate-950/60 border border-slate-800 space-y-2">
+          <div className="p-3.5 rounded-xl bg-slate-950/60 border border-slate-800 space-y-2">
             <div className="text-xs font-bold text-slate-200">Demoras (%)</div>
             <div className="grid grid-cols-2 gap-3 text-xs">
               <div>
@@ -112,7 +112,7 @@ export function ThresholdsModal({ isOpen, onClose, thresholds, onSaveThresholds 
                   step="0.5"
                   value={current.demorasPct.ok}
                   onChange={(e) => handleChange('demorasPct', 'ok', e.target.value)}
-                  className="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1.5 text-slate-100 text-sm"
+                  className="w-full bg-slate-900 border border-slate-700 focus:border-amber-500 focus:outline-none rounded-xl px-3 py-2 text-slate-100 text-sm font-mono [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none transition-all"
                 />
               </div>
               <div>
@@ -122,14 +122,14 @@ export function ThresholdsModal({ isOpen, onClose, thresholds, onSaveThresholds 
                   step="0.5"
                   value={current.demorasPct.warning}
                   onChange={(e) => handleChange('demorasPct', 'warning', e.target.value)}
-                  className="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1.5 text-slate-100 text-sm"
+                  className="w-full bg-slate-900 border border-slate-700 focus:border-amber-500 focus:outline-none rounded-xl px-3 py-2 text-slate-100 text-sm font-mono [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none transition-all"
                 />
               </div>
             </div>
           </div>
 
           {/* Disponibilidad % */}
-          <div className="p-3.5 rounded-lg bg-slate-950/60 border border-slate-800 space-y-2">
+          <div className="p-3.5 rounded-xl bg-slate-950/60 border border-slate-800 space-y-2">
             <div className="text-xs font-bold text-slate-200">Disponibilidad de Tienda (%)</div>
             <div className="grid grid-cols-2 gap-3 text-xs">
               <div>
@@ -139,7 +139,7 @@ export function ThresholdsModal({ isOpen, onClose, thresholds, onSaveThresholds 
                   step="0.5"
                   value={current.disponibilidad.ok}
                   onChange={(e) => handleChange('disponibilidad', 'ok', e.target.value)}
-                  className="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1.5 text-slate-100 text-sm"
+                  className="w-full bg-slate-900 border border-slate-700 focus:border-amber-500 focus:outline-none rounded-xl px-3 py-2 text-slate-100 text-sm font-mono [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none transition-all"
                 />
               </div>
               <div>
@@ -149,7 +149,7 @@ export function ThresholdsModal({ isOpen, onClose, thresholds, onSaveThresholds 
                   step="0.5"
                   value={current.disponibilidad.warning}
                   onChange={(e) => handleChange('disponibilidad', 'warning', e.target.value)}
-                  className="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1.5 text-slate-100 text-sm"
+                  className="w-full bg-slate-900 border border-slate-700 focus:border-amber-500 focus:outline-none rounded-xl px-3 py-2 text-slate-100 text-sm font-mono [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none transition-all"
                 />
               </div>
             </div>
@@ -159,24 +159,24 @@ export function ThresholdsModal({ isOpen, onClose, thresholds, onSaveThresholds 
             <button
               type="button"
               onClick={handleReset}
-              className="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-slate-200"
+              className="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-slate-200 transition-colors cursor-pointer"
             >
               <RotateCcw className="w-3.5 h-3.5" />
               Restablecer Valores
             </button>
             <div className="flex items-center gap-2">
               <button
-                type="button"
-                onClick={onClose}
-                className="px-4 py-2 text-xs font-semibold text-slate-400 hover:text-slate-200"
-              >
-                Cancelar
-              </button>
-              <button
                 type="submit"
-                className="px-4 py-2 text-xs font-semibold bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition-colors shadow-lg shadow-blue-500/20"
+                className="px-4 py-2 text-xs font-bold bg-amber-500 hover:bg-amber-400 text-slate-950 rounded-xl transition-all shadow-md shadow-amber-500/20 active:scale-95 cursor-pointer"
               >
                 Guardar Parámetros
+              </button>
+              <button
+                type="button"
+                onClick={onClose}
+                className="px-4 py-2 text-xs font-semibold text-slate-400 hover:text-slate-200 transition-colors cursor-pointer"
+              >
+                Cancelar
               </button>
             </div>
           </div>

@@ -74,7 +74,7 @@ export function CustomSelect({
   };
 
   return (
-    <div ref={containerRef} className="relative inline-block text-left">
+    <div ref={containerRef} className={`relative inline-block text-left ${isOpen ? 'z-50' : 'z-20'}`}>
       {/* Trigger Button */}
       <button
         type="button"
@@ -98,11 +98,11 @@ export function CustomSelect({
         />
       </button>
 
-      {/* Dropdown Menu */}
+      {/* Dropdown Menu (fully opaque, elevated z-50, scrollbar hidden) */}
       {isOpen && (
         <div
           ref={menuRef}
-          className={`absolute left-0 mt-1.5 min-w-[210px] w-full max-h-64 overflow-y-auto z-50 bg-slate-900/98 backdrop-blur-xl border border-slate-700/80 rounded-xl shadow-2xl shadow-black/80 p-1.5 space-y-0.5 font-sans ${dropdownClassName}`}
+          className={`absolute left-0 mt-1.5 min-w-[240px] w-full max-h-72 overflow-y-auto no-scrollbar z-50 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl shadow-black p-1.5 space-y-0.5 font-sans ring-1 ring-white/10 ${dropdownClassName}`}
         >
           {normalizedOptions.map((opt) => {
             const isSelected = opt.value === value;

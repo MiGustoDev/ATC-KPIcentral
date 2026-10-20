@@ -204,7 +204,7 @@ export function ReviewsDashboard({ supervisors, stores }) {
   return (
     <div ref={reviewsContainerRef} className="space-y-5 w-full">
       {/* Filter Bar */}
-      <div className="rev-filter-bar bg-slate-900/90 border border-slate-800 rounded-2xl p-3.5 sm:p-4 shadow-xl">
+      <div className="rev-filter-bar relative z-30 bg-slate-900/90 border border-slate-800 rounded-2xl p-3.5 sm:p-4 shadow-xl">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex flex-wrap items-center gap-3 sm:gap-4">
             {/* Month */}
@@ -293,7 +293,7 @@ export function ReviewsDashboard({ supervisors, stores }) {
       </div>
 
       {/* Metrics Row with GSAP Stagger and Animated Counters */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 font-mono-numbers">
+      <div className="relative z-10 grid grid-cols-1 sm:grid-cols-3 gap-3 font-mono-numbers">
         {/* Puntuación Promedio */}
         <div className="rev-metric-card bg-slate-900/90 border border-slate-800/90 rounded-2xl p-4 shadow-lg hover:-translate-y-1 hover:border-slate-700/80 hover:shadow-xl hover:shadow-black/40 transition-all duration-200 cursor-default">
           <div className="flex items-center justify-between text-xs text-slate-400 mb-1.5 font-sans">

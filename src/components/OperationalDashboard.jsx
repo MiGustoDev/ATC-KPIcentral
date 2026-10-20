@@ -29,7 +29,7 @@ export function OperationalDashboard({
 
   const containerRef = useRef(null);
 
-  // GSAP animation for filter bar and KPI cards
+  // Initial entrance animation for filter bar and KPI cards (runs once on mount)
   useGSAP(
     () => {
       const tl = gsap.timeline({ defaults: { ease: 'power2.out' } });
@@ -39,26 +39,26 @@ export function OperationalDashboard({
         { opacity: 1, y: 0, duration: 0.4 }
       ).fromTo(
         '.kpi-card',
-        { opacity: 0, y: 14, scale: 0.97 },
-        { opacity: 1, y: 0, scale: 1, duration: 0.45, stagger: 0.035 },
+        { opacity: 0, y: 12, scale: 0.98 },
+        { opacity: 1, y: 0, scale: 1, duration: 0.4, stagger: 0.035 },
         '-=0.2'
       );
     },
-    { scope: containerRef, dependencies: [selectedPeriod, selectedCanal, selectedSup] }
+    { scope: containerRef, dependencies: [] }
   );
 
-  // GSAP animation when switching tabs
+  // Smooth grid transition when changing channels, supervisors, period or view tab
   useGSAP(
     () => {
       if (containerRef.current) {
         gsap.fromTo(
           '.op-view-content',
-          { opacity: 0, y: 10 },
-          { opacity: 1, y: 0, duration: 0.35, ease: 'power2.out' }
+          { opacity: 0.35, y: 8 },
+          { opacity: 1, y: 0, duration: 0.3, ease: 'power2.out' }
         );
       }
     },
-    { scope: containerRef, dependencies: [activeTab] }
+    { scope: containerRef, dependencies: [selectedCanal, selectedSup, selectedPeriod, activeTab] }
   );
 
   // Map stores to supervisor
@@ -265,7 +265,7 @@ export function OperationalDashboard({
   return (
     <div ref={containerRef} className="space-y-5 w-full">
       {/* Filters Bar */}
-      <div className="op-filter-bar bg-slate-900/90 border border-slate-800 rounded-2xl p-3.5 sm:p-4 shadow-xl">
+      <div className="op-filter-bar relative z-30 bg-slate-900/90 border border-slate-800 rounded-2xl p-3.5 sm:p-4 shadow-xl">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex flex-wrap items-center gap-3 sm:gap-4">
             {/* Period Selector */}
@@ -360,7 +360,7 @@ export function OperationalDashboard({
       </div>
 
       {/* KPI Cards Grid with GSAP Stagger and Animated Counters */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 font-mono-numbers">
+      <div className="relative z-10 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 font-mono-numbers">
         {/* Órdenes */}
         <div className="kpi-card bg-slate-900/90 border border-slate-800/90 rounded-2xl p-3.5 sm:p-4 hover:-translate-y-1 hover:border-slate-700/80 hover:shadow-xl hover:shadow-black/40 transition-all duration-200 cursor-default shadow-lg">
           <div className="flex items-center justify-between text-xs text-slate-400 mb-1.5 font-sans">

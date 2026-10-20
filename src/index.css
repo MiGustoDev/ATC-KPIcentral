@@ -26,8 +26,6 @@
 /* GPU hardware acceleration helpers for silky GSAP tweens */
 .kpi-card,
 .rev-metric-card,
-.op-filter-bar,
-.rev-filter-bar,
 .op-view-content,
 .table-row-anim,
 .rev-row-anim {
@@ -63,4 +61,25 @@
 
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(148, 163, 184, 0.6);
+}
+
+/* Hide scrollbars utility (still scrollable) */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Hide number input spin buttons / arrows */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  appearance: none;
+  margin: 0;
+}
+input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
 }
