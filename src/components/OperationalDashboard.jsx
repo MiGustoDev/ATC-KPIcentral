@@ -1,12 +1,11 @@
 import React, { useState, useMemo, useRef } from 'react';
 import { 
-  TrendingUp, AlertTriangle, ArrowUpDown, Download, 
-  CheckCircle2, Clock, AlertOctagon, DollarSign, ShieldAlert, 
-  Search
+  ArrowUpDown, Download, Search, AlertTriangle,
+  ShoppingBag, XCircle, MessageSquareWarning, DollarSign, Clock, CheckCircle2
 } from 'lucide-react';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
-import { fmtInt, fmtCurrency, fmtPct, getMetricStatus } from '../utils';
+import { fmtInt, fmtCurrency, fmtPct, getMetricStatus, getInitials } from '../utils';
 import { CHANNELS } from '../config';
 import { AnimatedCounter } from './AnimatedCounter';
 import { CustomSelect } from './CustomSelect';
@@ -26,6 +25,7 @@ export function OperationalDashboard({
   const [sortField, setSortField] = useState('confirmadas');
   const [sortAsc, setSortAsc] = useState(false);
   const [activeTab, setActiveTab] = useState('table'); // 'table' | 'grouped'
+  const [filterOnlyCritical, setFilterOnlyCritical] = useState(false);
 
   const containerRef = useRef(null);
 
@@ -47,18 +47,46 @@ export function OperationalDashboard({
     { scope: containerRef, dependencies: [] }
   );
 
-  // Smooth grid transition when changing channels, supervisors, period or view tab
+  // Smooth, subtle transition when switching between subtabs
   useGSAP(
     () => {
-      if (containerRef.current) {
+      if (!containerRef.current) return;
+      const viewContent = containerRef.current.querySelector('.op-view-content');
+      if (viewContent) {
         gsap.fromTo(
-          '.op-view-content',
-          { opacity: 0.35, y: 8 },
-          { opacity: 1, y: 0, duration: 0.3, ease: 'power2.out' }
+          viewContent,
+          { opacity: 0, y: 6 },
+          { opacity: 1, y: 0, duration: 0.28, ease: 'power2.out', clearProps: 'transform' }
+        );
+      }
+      if (activeTab === 'grouped') {
+        const groupCards = containerRef.current.querySelectorAll('.sup-group-card');
+        if (groupCards.length > 0) {
+          gsap.fromTo(
+            groupCards,
+            { opacity: 0, y: 8 },
+            { opacity: 1, y: 0, duration: 0.3, stagger: 0.03, ease: 'power2.out', clearProps: 'transform' }
+          );
+        }
+      }
+    },
+    { scope: containerRef, dependencies: [activeTab] }
+  );
+
+  // Subtle transition when filtering channels, supervisors, period or critical records
+  useGSAP(
+    () => {
+      if (!containerRef.current) return;
+      const viewContent = containerRef.current.querySelector('.op-view-content');
+      if (viewContent) {
+        gsap.fromTo(
+          viewContent,
+          { opacity: 0.45 },
+          { opacity: 1, duration: 0.22, ease: 'power1.out' }
         );
       }
     },
-    { scope: containerRef, dependencies: [selectedCanal, selectedSup, selectedPeriod, activeTab] }
+    { scope: containerRef, dependencies: [selectedCanal, selectedSup, selectedPeriod, filterOnlyCritical] }
   );
 
   // Map stores to supervisor
@@ -99,9 +127,23 @@ export function OperationalDashboard({
     });
   }, [periodData, selectedCanal, selectedSup, searchTerm, storeMap]);
 
-  // Sorted records
+  // Helper to determine if a record has any critical metric
+  const isCriticalRecord = (r) => {
+    return (
+      getMetricStatus('cancelacionesPct', r.cancelacionesPct, thresholds) === 'danger' ||
+      getMetricStatus('reclamosPct', r.reclamosPct, thresholds) === 'danger' ||
+      getMetricStatus('demorasPct', r.demorasPct, thresholds) === 'danger' ||
+      getMetricStatus('disponibilidad', r.disponibilidad, thresholds) === 'danger'
+    );
+  };
+
+  // Sorted records (optionally filtered to only critical rows)
   const sortedRecords = useMemo(() => {
-    return [...filteredRecords].sort((a, b) => {
+    const list = filterOnlyCritical
+      ? filteredRecords.filter(isCriticalRecord)
+      : filteredRecords;
+
+    return [...list].sort((a, b) => {
       let valA = a[sortField];
       let valB = b[sortField];
       if (typeof valA === 'string') {
@@ -109,7 +151,7 @@ export function OperationalDashboard({
       }
       return sortAsc ? (valA || 0) - (valB || 0) : (valB || 0) - (valA || 0);
     });
-  }, [filteredRecords, sortField, sortAsc]);
+  }, [filteredRecords, filterOnlyCritical, sortField, sortAsc, thresholds]);
 
   // Aggregate global KPIs for filtered selection
   const kpiSummary = useMemo(() => {
@@ -182,7 +224,11 @@ export function OperationalDashboard({
       disponibilidadAvg: 0
     };
 
-    filteredRecords.forEach((r) => {
+    const targetRecords = filterOnlyCritical
+      ? filteredRecords.filter(isCriticalRecord)
+      : filteredRecords;
+
+    targetRecords.forEach((r) => {
       const supId = storeMap[r.tienda.toLowerCase()] || 'unassigned';
       if (!groups[supId]) {
         groups[supId] = {
@@ -218,7 +264,7 @@ export function OperationalDashboard({
         };
       })
       .sort((a, b) => b.totalOrders - a.totalOrders);
-  }, [filteredRecords, supervisors, storeMap]);
+  }, [filteredRecords, filterOnlyCritical, supervisors, storeMap, thresholds]);
 
   const handleSort = (field) => {
     if (sortField === field) {
@@ -367,15 +413,13 @@ export function OperationalDashboard({
         </div>
       </div>
 
-      {/* KPI Cards Grid - Elevated Modern Aesthetic */}
+      {/* KPI Cards Grid */}
       <div className="relative z-10 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5 font-mono-numbers">
         {/* Órdenes */}
-        <div className="kpi-card glass-card rounded-2xl p-4 sm:p-4.5 hover:-translate-y-1 hover:border-blue-500/40 transition-all duration-200 cursor-default shadow-lg group">
+        <div className="kpi-card glass-card rounded-2xl p-4 sm:p-4.5 hover:-translate-y-1 hover:border-slate-700 transition-all duration-200 cursor-default shadow-lg group">
           <div className="flex items-center justify-between text-xs text-slate-400 mb-2 font-sans">
             <span className="font-semibold text-slate-300">Órdenes Confirmadas</span>
-            <div className="w-7 h-7 rounded-lg bg-blue-500/15 text-blue-400 flex items-center justify-center ring-1 ring-blue-500/25 group-hover:scale-110 transition-transform">
-              <TrendingUp className="w-3.5 h-3.5" />
-            </div>
+            <ShoppingBag className="w-5 h-5 text-blue-400 opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-all duration-200" />
           </div>
           <div className="text-2xl sm:text-3xl font-black text-white tracking-tight">
             <AnimatedCounter value={kpiSummary.totalOrders} decimals={0} />
@@ -391,12 +435,10 @@ export function OperationalDashboard({
         {(() => {
           const status = getMetricStatus('cancelacionesPct', kpiSummary.cancPct, thresholds);
           return (
-            <div className="kpi-card glass-card rounded-2xl p-4 sm:p-4.5 hover:-translate-y-1 hover:border-amber-500/40 transition-all duration-200 cursor-default shadow-lg group">
+            <div className="kpi-card glass-card rounded-2xl p-4 sm:p-4.5 hover:-translate-y-1 hover:border-slate-700 transition-all duration-200 cursor-default shadow-lg group">
               <div className="flex items-center justify-between text-xs text-slate-400 mb-2 font-sans">
                 <span className="font-semibold text-slate-300">% Cancelaciones</span>
-                <div className="w-7 h-7 rounded-lg bg-amber-500/15 text-amber-400 flex items-center justify-center ring-1 ring-amber-500/25 group-hover:scale-110 transition-transform">
-                  <AlertTriangle className="w-3.5 h-3.5" />
-                </div>
+                <XCircle className="w-5 h-5 text-amber-400 opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-all duration-200" />
               </div>
               <div className="text-2xl sm:text-3xl font-black text-white tracking-tight">
                 <AnimatedCounter value={kpiSummary.cancPct} decimals={1} suffix="%" />
@@ -423,12 +465,10 @@ export function OperationalDashboard({
         {(() => {
           const status = getMetricStatus('reclamosPct', kpiSummary.recPct, thresholds);
           return (
-            <div className="kpi-card glass-card rounded-2xl p-4 sm:p-4.5 hover:-translate-y-1 hover:border-indigo-500/40 transition-all duration-200 cursor-default shadow-lg group">
+            <div className="kpi-card glass-card rounded-2xl p-4 sm:p-4.5 hover:-translate-y-1 hover:border-slate-700 transition-all duration-200 cursor-default shadow-lg group">
               <div className="flex items-center justify-between text-xs text-slate-400 mb-2 font-sans">
                 <span className="font-semibold text-slate-300">% Reclamos</span>
-                <div className="w-7 h-7 rounded-lg bg-indigo-500/15 text-indigo-400 flex items-center justify-center ring-1 ring-indigo-500/25 group-hover:scale-110 transition-transform">
-                  <ShieldAlert className="w-3.5 h-3.5" />
-                </div>
+                <MessageSquareWarning className="w-5 h-5 text-indigo-400 opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-all duration-200" />
               </div>
               <div className="text-2xl sm:text-3xl font-black text-white tracking-tight">
                 <AnimatedCounter value={kpiSummary.recPct} decimals={1} suffix="%" />
@@ -452,12 +492,10 @@ export function OperationalDashboard({
         })()}
 
         {/* Costo Reclamos */}
-        <div className="kpi-card glass-card rounded-2xl p-4 sm:p-4.5 hover:-translate-y-1 hover:border-emerald-500/40 transition-all duration-200 cursor-default shadow-lg group">
+        <div className="kpi-card glass-card rounded-2xl p-4 sm:p-4.5 hover:-translate-y-1 hover:border-slate-700 transition-all duration-200 cursor-default shadow-lg group">
           <div className="flex items-center justify-between text-xs text-slate-400 mb-2 font-sans">
             <span className="font-semibold text-slate-300">Costo Reclamos</span>
-            <div className="w-7 h-7 rounded-lg bg-emerald-500/15 text-emerald-400 flex items-center justify-center ring-1 ring-emerald-500/25 group-hover:scale-110 transition-transform">
-              <DollarSign className="w-3.5 h-3.5" />
-            </div>
+            <DollarSign className="w-5 h-5 text-emerald-400 opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-all duration-200" />
           </div>
           <div className="text-2xl sm:text-3xl font-black text-emerald-400 tracking-tight">
             <AnimatedCounter value={kpiSummary.recCosto} decimals={0} prefix="$ " />
@@ -473,12 +511,10 @@ export function OperationalDashboard({
         {(() => {
           const status = getMetricStatus('demorasPct', kpiSummary.demPct, thresholds);
           return (
-            <div className="kpi-card glass-card rounded-2xl p-4 sm:p-4.5 hover:-translate-y-1 hover:border-orange-500/40 transition-all duration-200 cursor-default shadow-lg group">
+            <div className="kpi-card glass-card rounded-2xl p-4 sm:p-4.5 hover:-translate-y-1 hover:border-slate-700 transition-all duration-200 cursor-default shadow-lg group">
               <div className="flex items-center justify-between text-xs text-slate-400 mb-2 font-sans">
                 <span className="font-semibold text-slate-300">% Demoras</span>
-                <div className="w-7 h-7 rounded-lg bg-orange-500/15 text-orange-400 flex items-center justify-center ring-1 ring-orange-500/25 group-hover:scale-110 transition-transform">
-                  <Clock className="w-3.5 h-3.5" />
-                </div>
+                <Clock className="w-5 h-5 text-orange-400 opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-all duration-200" />
               </div>
               <div className="text-2xl sm:text-3xl font-black text-white tracking-tight">
                 <AnimatedCounter value={kpiSummary.demPct} decimals={1} suffix="%" />
@@ -505,12 +541,10 @@ export function OperationalDashboard({
         {(() => {
           const status = getMetricStatus('disponibilidad', kpiSummary.dispAvg, thresholds);
           return (
-            <div className="kpi-card glass-card rounded-2xl p-4 sm:p-4.5 hover:-translate-y-1 hover:border-teal-500/40 transition-all duration-200 cursor-default shadow-lg group">
+            <div className="kpi-card glass-card rounded-2xl p-4 sm:p-4.5 hover:-translate-y-1 hover:border-slate-700 transition-all duration-200 cursor-default shadow-lg group">
               <div className="flex items-center justify-between text-xs text-slate-400 mb-2 font-sans">
                 <span className="font-semibold text-slate-300">Disponibilidad</span>
-                <div className="w-7 h-7 rounded-lg bg-teal-500/15 text-teal-400 flex items-center justify-center ring-1 ring-teal-500/25 group-hover:scale-110 transition-transform">
-                  <CheckCircle2 className="w-3.5 h-3.5" />
-                </div>
+                <CheckCircle2 className="w-5 h-5 text-teal-400 opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-all duration-200" />
               </div>
               <div className="text-2xl sm:text-3xl font-black text-white tracking-tight">
                 <AnimatedCounter value={kpiSummary.dispAvg} decimals={1} suffix="%" />
@@ -560,14 +594,48 @@ export function OperationalDashboard({
         </div>
 
         {kpiSummary.criticCount > 0 && (
-          <div className="inline-flex items-center gap-2 text-xs px-3.5 py-1.5 rounded-full bg-rose-500/10 text-rose-300 border border-rose-500/25 font-semibold shadow-sm shadow-rose-950/30">
+          <button
+            type="button"
+            onClick={() => setFilterOnlyCritical((prev) => !prev)}
+            className={`inline-flex items-center gap-2.5 text-xs px-3.5 py-1.5 rounded-full transition-all duration-300 cursor-pointer select-none border backdrop-blur-md ${
+              filterOnlyCritical
+                ? 'bg-gradient-to-r from-rose-950/90 via-rose-900/80 to-red-950/90 text-white border-rose-400 shadow-[0_0_20px_rgba(244,63,94,0.4)] ring-2 ring-rose-500/30'
+                : 'bg-gradient-to-r from-rose-950/60 via-slate-900/80 to-rose-950/40 text-rose-200 border-rose-500/35 hover:border-rose-400/60 hover:bg-rose-950/80 shadow-[0_0_15px_rgba(244,63,94,0.18)] hover:shadow-[0_0_20px_rgba(244,63,94,0.3)]'
+            }`}
+            title={filterOnlyCritical ? "Click para ver todos los registros" : "Click para filtrar sólo registros críticos"}
+          >
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75" />
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-500" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-500 ring-2 ring-rose-400/30" />
             </span>
-            <AlertOctagon className="w-3.5 h-3.5 text-rose-400" />
-            <span>{kpiSummary.criticCount} registros requieren atención o están críticos</span>
-          </div>
+
+            <div className="w-5 h-5 rounded-md bg-rose-500/20 border border-rose-500/30 flex items-center justify-center text-rose-300 group-hover:scale-105 transition-transform">
+              <AlertTriangle className="w-3 h-3 stroke-[2.3]" />
+            </div>
+
+            <span className="px-1.5 py-0.5 rounded-md bg-rose-500/25 border border-rose-500/35 text-rose-100 font-mono-numbers font-bold text-[11px] leading-none shadow-inner">
+              {kpiSummary.criticCount}
+            </span>
+
+            <span className="font-semibold tracking-tight text-slate-200">
+              registros requieren atención o están críticos
+            </span>
+
+            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border transition-all ${
+              filterOnlyCritical
+                ? 'bg-rose-500 text-white border-rose-300 flex items-center gap-1 shadow-sm'
+                : 'bg-rose-500/15 text-rose-300 border-rose-500/25 hover:bg-rose-500/25'
+            }`}>
+              {filterOnlyCritical ? (
+                <>
+                  <span>Filtrando</span>
+                  <span className="text-xs leading-none font-bold">&times;</span>
+                </>
+              ) : (
+                'Filtrar'
+              )}
+            </span>
+          </button>
         )}
       </div>
 
@@ -781,7 +849,7 @@ export function OperationalDashboard({
           {supervisorGroups.map((g) => (
             <div
               key={g.supervisor.id}
-              className="glass-card rounded-2xl p-5 space-y-4 shadow-xl hover:-translate-y-1 hover:border-slate-700 transition-all duration-200"
+              className="sup-group-card glass-card rounded-2xl p-5 space-y-4 shadow-xl hover:-translate-y-1 hover:border-slate-700 transition-all duration-200"
             >
               <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">
                 <div className="flex items-center gap-3">
@@ -789,7 +857,7 @@ export function OperationalDashboard({
                     className="w-10 h-10 rounded-xl flex items-center justify-center font-black text-xs shadow-md ring-1 ring-white/10"
                     style={{ backgroundColor: `${g.supervisor.color}25`, color: g.supervisor.color }}
                   >
-                    {g.supervisor.name.substring(0, 2).toUpperCase()}
+                    {getInitials(g.supervisor.name)}
                   </div>
                   <div>
                     <h3 className="font-extrabold text-base text-white">{g.supervisor.name}</h3>
