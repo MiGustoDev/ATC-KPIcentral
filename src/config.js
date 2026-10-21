@@ -109,9 +109,9 @@ export const CHANNELS = [
 export const REVIEW_CHANNELS = [
   { id: 'PedidosYa', label: 'PedidosYa', color: '#e11d48' },
   { id: 'Rappi', label: 'Rappi', color: '#ea580c' },
-  { id: 'Mercado Delivery', label: 'Mercado Delivery', color: '#059669' },
-  { id: 'TePido', label: 'TePido', color: '#2563eb' },
-  { id: 'Google', label: 'Google Maps', color: '#4b5563' }
+  { id: 'Mercado Delivery', label: 'Mercado Delivery', color: '#f59e0b' },
+  { id: 'TePido', label: 'TePido', color: '#9333ea' },
+  { id: 'Google', label: 'Google Maps', color: '#0284c7' }
 ];
 
 export const CANAL_THEMES = {
@@ -132,12 +132,12 @@ export const CANAL_THEMES = {
     inactive: 'text-slate-400 hover:text-amber-300 hover:bg-amber-400/10 font-medium'
   },
   TePido: {
-    active: 'bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-md shadow-blue-600/35 border border-blue-400/40 font-bold',
-    inactive: 'text-slate-400 hover:text-blue-400 hover:bg-blue-500/10 font-medium'
+    active: 'bg-gradient-to-r from-purple-600 to-purple-500 text-white shadow-md shadow-purple-600/35 border border-purple-400/40 font-bold',
+    inactive: 'text-slate-400 hover:text-purple-400 hover:bg-purple-500/10 font-medium'
   },
   Google: {
-    active: 'bg-gradient-to-r from-slate-600 to-slate-700 text-white shadow-md shadow-slate-700/35 border border-slate-500/40 font-bold',
-    inactive: 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40 font-medium'
+    active: 'bg-gradient-to-r from-sky-600 to-blue-600 text-white shadow-md shadow-sky-600/35 border border-sky-400/40 font-bold',
+    inactive: 'text-slate-400 hover:text-sky-400 hover:bg-sky-500/10 font-medium'
   }
 };
 

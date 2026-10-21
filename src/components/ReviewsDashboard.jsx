@@ -90,7 +90,7 @@ export function ReviewsDashboard({ supervisors, stores }) {
 
   const reviewsContainerRef = useRef(null);
 
-  // GSAP animation for filter bar and metrics cards
+  // GSAP animation for initial mount
   useGSAP(
     () => {
       const tl = gsap.timeline({ defaults: { ease: 'power2.out' } });
@@ -100,15 +100,31 @@ export function ReviewsDashboard({ supervisors, stores }) {
         { opacity: 1, y: 0, duration: 0.4 }
       ).fromTo(
         '.rev-metric-card',
-        { opacity: 0, y: 14, scale: 0.97 },
-        { opacity: 1, y: 0, scale: 1, duration: 0.45, stagger: 0.05 },
+        { opacity: 0, y: 12, scale: 0.98 },
+        { opacity: 1, y: 0, scale: 1, duration: 0.4, stagger: 0.04 },
         '-=0.2'
       ).fromTo(
         '.rev-table-container',
-        { opacity: 0, y: 10 },
-        { opacity: 1, y: 0, duration: 0.38 },
+        { opacity: 0, y: 8 },
+        { opacity: 1, y: 0, duration: 0.35 },
         '-=0.2'
       );
+    },
+    { scope: reviewsContainerRef, dependencies: [] }
+  );
+
+  // Subtle transition when changing month, canal or supervisor filters
+  useGSAP(
+    () => {
+      if (!reviewsContainerRef.current) return;
+      const target = reviewsContainerRef.current.querySelector('.rev-table-container');
+      if (target) {
+        gsap.fromTo(
+          target,
+          { opacity: 0.45 },
+          { opacity: 1, duration: 0.22, ease: 'power1.out' }
+        );
+      }
     },
     { scope: reviewsContainerRef, dependencies: [selectedMonth, selectedCanal, selectedSup] }
   );
@@ -226,7 +242,8 @@ export function ReviewsDashboard({ supervisors, stores }) {
                 selectedCanal === 'PedidosYa' ? 'border-red-500/40' :
                 selectedCanal === 'Rappi' ? 'border-orange-500/40' :
                 selectedCanal === 'Mercado Delivery' ? 'border-amber-400/40' :
-                selectedCanal === 'TePido' ? 'border-blue-500/40' :
+                selectedCanal === 'TePido' ? 'border-purple-500/40' :
+                selectedCanal === 'Google' ? 'border-sky-500/40' :
                 'border-slate-800/80'
               }`}>
                 <button
@@ -311,12 +328,10 @@ export function ReviewsDashboard({ supervisors, stores }) {
       {/* Metrics Row - Modern Glass Cards */}
       <div className="relative z-10 grid grid-cols-1 sm:grid-cols-3 gap-3.5 font-mono-numbers">
         {/* Puntuación Promedio */}
-        <div className="rev-metric-card glass-card rounded-2xl p-4 sm:p-5 shadow-lg hover:-translate-y-1 hover:border-amber-500/40 transition-all duration-200 cursor-default group">
+        <div className="rev-metric-card glass-card rounded-2xl p-4 sm:p-5 shadow-lg hover:-translate-y-1 hover:border-slate-700 transition-all duration-200 cursor-default group">
           <div className="flex items-center justify-between text-xs text-slate-400 mb-2 font-sans">
             <span className="font-semibold text-slate-300">Puntuación Promedio General</span>
-            <div className="w-7 h-7 rounded-lg bg-amber-500/15 text-amber-400 flex items-center justify-center ring-1 ring-amber-500/25 group-hover:scale-110 transition-transform">
-              <Star className="w-4 h-4 fill-amber-400" />
-            </div>
+            <Star className="w-5 h-5 text-amber-400 fill-amber-400/20 opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-all duration-200" />
           </div>
           <div className="text-2xl sm:text-3xl font-black text-white flex items-baseline gap-2 tracking-tight">
             <AnimatedCounter value={parseFloat(summary.avgScore) || 0} decimals={2} />
@@ -330,12 +345,10 @@ export function ReviewsDashboard({ supervisors, stores }) {
         </div>
 
         {/* Reseñas Nuevas */}
-        <div className="rev-metric-card glass-card rounded-2xl p-4 sm:p-5 shadow-lg hover:-translate-y-1 hover:border-blue-500/40 transition-all duration-200 cursor-default group">
+        <div className="rev-metric-card glass-card rounded-2xl p-4 sm:p-5 shadow-lg hover:-translate-y-1 hover:border-slate-700 transition-all duration-200 cursor-default group">
           <div className="flex items-center justify-between text-xs text-slate-400 mb-2 font-sans">
             <span className="font-semibold text-slate-300">Total Nuevas Reseñas</span>
-            <div className="w-7 h-7 rounded-lg bg-blue-500/15 text-blue-400 flex items-center justify-center ring-1 ring-blue-500/25 group-hover:scale-110 transition-transform">
-              <MessageSquare className="w-3.5 h-3.5" />
-            </div>
+            <MessageSquare className="w-5 h-5 text-blue-400 opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-all duration-200" />
           </div>
           <div className="text-2xl sm:text-3xl font-black text-white tracking-tight">
             <AnimatedCounter value={summary.totalReviews} decimals={0} />
@@ -348,18 +361,14 @@ export function ReviewsDashboard({ supervisors, stores }) {
         </div>
 
         {/* Alertas de Caída */}
-        <div className="rev-metric-card glass-card rounded-2xl p-4 sm:p-5 shadow-lg hover:-translate-y-1 hover:border-rose-500/40 transition-all duration-200 cursor-default group">
+        <div className="rev-metric-card glass-card rounded-2xl p-4 sm:p-5 shadow-lg hover:-translate-y-1 hover:border-slate-700 transition-all duration-200 cursor-default group">
           <div className="flex items-center justify-between text-xs text-slate-400 mb-2 font-sans">
             <span className="font-semibold text-slate-300">Alertas por Caída de Calificación</span>
-            <div
-              className={`w-7 h-7 rounded-lg flex items-center justify-center ring-1 transition-transform group-hover:scale-110 ${
-                summary.dropCount > 0
-                  ? 'bg-rose-500/15 text-rose-400 ring-rose-500/25'
-                  : 'bg-emerald-500/15 text-emerald-400 ring-emerald-500/25'
+            <AlertTriangle
+              className={`w-5 h-5 opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-all duration-200 ${
+                summary.dropCount > 0 ? 'text-rose-400' : 'text-emerald-400'
               }`}
-            >
-              <AlertTriangle className="w-3.5 h-3.5" />
-            </div>
+            />
           </div>
           <div className={`text-2xl sm:text-3xl font-black tracking-tight ${summary.dropCount > 0 ? 'text-rose-400' : 'text-emerald-400'}`}>
             <AnimatedCounter value={summary.dropCount} decimals={0} />
@@ -420,8 +429,8 @@ export function ReviewsDashboard({ supervisors, stores }) {
                             : item.canal === 'Mercado Delivery'
                             ? 'bg-amber-500 text-white font-bold border border-amber-400/50 shadow-amber-950/40'
                             : item.canal === 'TePido'
-                            ? 'bg-purple-500 text-white font-bold border border-purple-400/40 shadow-purple-950/40'
-                            : 'bg-sky-500 text-white font-bold border border-sky-400/40 shadow-sky-950/40'
+                            ? 'bg-purple-600 text-white font-bold border border-purple-400/40 shadow-purple-950/40'
+                            : 'bg-sky-600 text-white font-bold border border-sky-400/40 shadow-sky-950/40'
                         }`}
                       >
                         {item.canal}
