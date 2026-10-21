@@ -9,6 +9,7 @@ export function CustomSelect({
   placeholder = 'Seleccionar...',
   className = '',
   dropdownClassName = '',
+  wrapperClassName = '',
   icon: Icon
 }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -74,12 +75,12 @@ export function CustomSelect({
   };
 
   return (
-    <div ref={containerRef} className={`relative inline-block text-left ${isOpen ? 'z-50' : 'z-20'}`}>
+    <div ref={containerRef} className={`relative text-left ${isOpen ? 'z-50' : 'z-20'} ${wrapperClassName || 'inline-block'}`}>
       {/* Trigger Button */}
       <button
         type="button"
         onClick={() => setIsOpen((prev) => !prev)}
-        className={`inline-flex items-center justify-between gap-2.5 bg-slate-950/80 border border-slate-800 hover:border-slate-750 text-white text-xs sm:text-sm font-semibold rounded-xl px-3.5 py-2 transition-all duration-200 cursor-pointer shadow-sm hover:shadow-md hover:shadow-black/40 focus:outline-none focus:border-amber-500/70 focus:ring-2 focus:ring-amber-500/15 ${className}`}
+        className={`w-full inline-flex items-center justify-between gap-2.5 bg-slate-950/80 border border-slate-800 hover:border-slate-750 text-white text-xs sm:text-sm font-semibold rounded-xl px-3.5 py-2 transition-all duration-200 cursor-pointer shadow-sm hover:shadow-md hover:shadow-black/40 focus:outline-none focus:border-amber-500/70 focus:ring-2 focus:ring-amber-500/15 ${className}`}
       >
         <div className="flex items-center gap-2 truncate">
           {Icon && <Icon className="w-3.5 h-3.5 text-slate-400 shrink-0" />}
@@ -102,7 +103,7 @@ export function CustomSelect({
       {isOpen && (
         <div
           ref={menuRef}
-          className={`absolute left-0 mt-1.5 min-w-[240px] w-full max-h-72 overflow-y-auto no-scrollbar z-50 bg-slate-900 border border-slate-700/80 rounded-2xl shadow-2xl shadow-black p-1.5 space-y-1 font-sans ring-1 ring-white/10 ${dropdownClassName}`}
+          className={`absolute left-0 mt-1.5 min-w-full w-full max-h-72 overflow-y-auto no-scrollbar z-50 bg-slate-900 border border-slate-700/80 rounded-2xl shadow-2xl shadow-black p-1.5 space-y-1 font-sans ring-1 ring-white/10 ${dropdownClassName}`}
         >
           {normalizedOptions.map((opt) => {
             const isSelected = opt.value === value;

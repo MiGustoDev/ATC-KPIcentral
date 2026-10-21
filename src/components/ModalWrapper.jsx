@@ -1,10 +1,34 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import gsap from 'gsap';
 
 export function ModalWrapper({ isOpen, onClose, children, className = '' }) {
   const [render, setRender] = useState(isOpen);
   const overlayRef = useRef(null);
   const panelRef = useRef(null);
+
+  // Prevent background scrolling while modal is open
+  useEffect(() => {
+    if (render) {
+      const originalOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = originalOverflow;
+      };
+    }
+  }, [render]);
+
+  // Handle ESC key to close
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        onClose?.();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
 
   useEffect(() => {
     if (isOpen) {
@@ -48,7 +72,7 @@ export function ModalWrapper({ isOpen, onClose, children, className = '' }) {
 
   if (!render) return null;
 
-  return (
+  return createPortal(
     <div
       ref={overlayRef}
       onClick={(e) => {
@@ -56,11 +80,14 @@ export function ModalWrapper({ isOpen, onClose, children, className = '' }) {
           onClose();
         }
       }}
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm"
+      className="fixed inset-0 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md overflow-y-auto"
+      style={{ zIndex: 9999 }}
     >
-      <div ref={panelRef} className={className}>
+      <div ref={panelRef} className={`relative my-auto ${className}`}>
         {children}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
+

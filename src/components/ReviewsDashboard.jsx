@@ -2,7 +2,7 @@ import React, { useState, useMemo, useRef } from 'react';
 import { 
   Star, TrendingUp, AlertTriangle, 
   MessageSquare, Plus, ArrowUpRight, ArrowDownRight,
-  Search
+  Search, X
 } from 'lucide-react';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
@@ -137,6 +137,22 @@ export function ReviewsDashboard({ supervisors, stores }) {
     count: 100,
     prevScore: 4.6
   });
+
+  // Options for modal dropdowns with rich styles
+  const storeOptions = useMemo(() => {
+    return stores.map((s) => ({
+      value: s.name,
+      label: s.name
+    }));
+  }, [stores]);
+
+  const formCanalOptions = useMemo(() => {
+    return REVIEW_CHANNELS.map((c) => ({
+      value: c.id,
+      label: c.label,
+      color: c.color
+    }));
+  }, []);
 
   // Store & Sup maps
   const storeMap = useMemo(() => {
@@ -569,43 +585,54 @@ export function ReviewsDashboard({ supervisors, stores }) {
       <ModalWrapper
         isOpen={showAddModal}
         onClose={() => setShowAddModal(false)}
-        className="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl"
+        className="bg-slate-900 border border-slate-800 rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl"
       >
-        <h3 className="font-extrabold text-base text-white flex items-center gap-2">
-          <Star className="w-5 h-5 text-amber-400 fill-amber-400" />
-          Carga Mensual de Puntuación
-        </h3>
-        <p className="text-xs text-slate-400">
+        <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+          <div className="flex items-center gap-2">
+            <Star className="w-5 h-5 text-amber-400 fill-amber-400" />
+            <h3 className="font-extrabold text-base text-white">Carga Mensual de Puntuación</h3>
+          </div>
+          <button
+            type="button"
+            onClick={() => setShowAddModal(false)}
+            className="text-slate-400 hover:text-slate-200 p-1 rounded-lg hover:bg-slate-800/60 transition-colors cursor-pointer"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+        <p className="text-xs text-slate-400 -mt-1">
           Registra la puntuación y volumen de reseñas de la sucursal para el mes seleccionado.
         </p>
 
         <form onSubmit={handleSaveReview} className="space-y-3.5">
-          <div>
-            <label className="text-xs font-bold text-slate-300">Sucursal:</label>
-            <select
-              value={newForm.tienda}
-              onChange={(e) => setNewForm({ ...newForm, tienda: e.target.value })}
-              className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs sm:text-sm text-white focus:outline-none focus:border-amber-500"
-            >
-              {stores.map((s) => (
-                <option key={s.id} value={s.name}>{s.name}</option>
-              ))}
-            </select>
+          {/* Fila 1 (2x2): Sucursal y Canal con CustomSelect estilizados */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label className="text-xs font-bold text-slate-300">Sucursal:</label>
+              <CustomSelect
+                value={newForm.tienda}
+                onChange={(val) => setNewForm({ ...newForm, tienda: val })}
+                options={storeOptions}
+                placeholder="Seleccionar sucursal..."
+                wrapperClassName="w-full mt-1"
+                className="w-full"
+              />
+            </div>
+
+            <div>
+              <label className="text-xs font-bold text-slate-300">Canal:</label>
+              <CustomSelect
+                value={newForm.canal}
+                onChange={(val) => setNewForm({ ...newForm, canal: val })}
+                options={formCanalOptions}
+                placeholder="Seleccionar canal..."
+                wrapperClassName="w-full mt-1"
+                className="w-full"
+              />
+            </div>
           </div>
 
-          <div>
-            <label className="text-xs font-bold text-slate-300">Canal:</label>
-            <select
-              value={newForm.canal}
-              onChange={(e) => setNewForm({ ...newForm, canal: e.target.value })}
-              className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs sm:text-sm text-white focus:outline-none focus:border-amber-500"
-            >
-              {REVIEW_CHANNELS.map((c) => (
-                <option key={c.id} value={c.id}>{c.label}</option>
-              ))}
-            </select>
-          </div>
-
+          {/* Fila 2 (2x2): Puntuación Actual y Mes Anterior */}
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="text-xs font-bold text-slate-300">Puntuación Actual (1-5):</label>
@@ -616,7 +643,7 @@ export function ReviewsDashboard({ supervisors, stores }) {
                 max="5"
                 value={newForm.score}
                 onChange={(e) => setNewForm({ ...newForm, score: e.target.value })}
-                className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs sm:text-sm text-white focus:outline-none focus:border-amber-500 font-mono"
+                className="w-full mt-1 bg-slate-950/80 border border-slate-800 hover:border-slate-700 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-white focus:outline-none focus:border-amber-500 font-mono shadow-sm transition-colors"
                 required
               />
             </div>
@@ -629,11 +656,12 @@ export function ReviewsDashboard({ supervisors, stores }) {
                 max="5"
                 value={newForm.prevScore}
                 onChange={(e) => setNewForm({ ...newForm, prevScore: e.target.value })}
-                className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs sm:text-sm text-white focus:outline-none focus:border-amber-500 font-mono"
+                className="w-full mt-1 bg-slate-950/80 border border-slate-800 hover:border-slate-700 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-white focus:outline-none focus:border-amber-500 font-mono shadow-sm transition-colors"
               />
             </div>
           </div>
 
+          {/* Fila 3: Un solo campo - Nuevas Reseñas Recibidas */}
           <div>
             <label className="text-xs font-bold text-slate-300">Nuevas Reseñas Recibidas:</label>
             <input
@@ -641,24 +669,25 @@ export function ReviewsDashboard({ supervisors, stores }) {
               min="0"
               value={newForm.count}
               onChange={(e) => setNewForm({ ...newForm, count: e.target.value })}
-              className="w-full mt-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs sm:text-sm text-white focus:outline-none focus:border-amber-500 font-mono"
+              className="w-full mt-1 bg-slate-950/80 border border-slate-800 hover:border-slate-700 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-white focus:outline-none focus:border-amber-500 font-mono shadow-sm transition-colors"
               required
             />
           </div>
 
+          {/* Botones de acción: Guardar Registro ANTES de Cancelar */}
           <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-800">
+            <button
+              type="submit"
+              className="px-4 py-2 text-xs font-bold bg-amber-500 hover:bg-amber-400 text-slate-950 rounded-xl transition-all shadow-md shadow-amber-500/20 cursor-pointer"
+            >
+              Guardar Registro
+            </button>
             <button
               type="button"
               onClick={() => setShowAddModal(false)}
-              className="px-4 py-2 text-xs font-bold text-slate-400 hover:text-white"
+              className="px-4 py-2 text-xs font-bold text-slate-400 hover:text-white transition-colors cursor-pointer"
             >
               Cancelar
-            </button>
-            <button
-              type="submit"
-              className="px-4 py-2 text-xs font-bold bg-amber-500 hover:bg-amber-400 text-slate-950 rounded-xl transition-all shadow-md shadow-amber-500/20"
-            >
-              Guardar Registro
             </button>
           </div>
         </form>
