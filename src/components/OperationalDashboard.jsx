@@ -9,6 +9,7 @@ import { fmtInt, fmtCurrency, fmtPct, getMetricStatus, getInitials } from '../ut
 import { CHANNELS, CANAL_THEMES } from '../config';
 import { AnimatedCounter } from './AnimatedCounter';
 import { CustomSelect } from './CustomSelect';
+import { exportOperationalKPItoPDF } from '../utils/pdfExport';
 
 export function OperationalDashboard({
   periodData,
@@ -275,37 +276,30 @@ export function OperationalDashboard({
     }
   };
 
-  const exportCSV = () => {
-    if (sortedRecords.length === 0) return;
-    const headers = [
-      'Canal', 'Tienda', 'Supervisor', 'Órdenes Confirmadas', 
-      'Cancelaciones (cant)', 'Cancelaciones (%)', 'Reclamos (cant)', 
-      'Reclamos (%)', 'Reclamos ($)', 'Demoras (cant)', 'Demoras (%)', 'Disponibilidad (%)'
-    ];
-    const rows = sortedRecords.map((r) => {
-      const sup = supervisorMap[storeMap[r.tienda.toLowerCase()]]?.name || 'Sin Asignar';
-      return [
-        r.canal,
-        `"${r.tienda}"`,
-        `"${sup}"`,
-        r.confirmadas,
-        r.cancelaciones,
-        r.cancelacionesPct,
-        r.reclamos,
-        r.reclamosPct,
-        r.reclamosCosto,
-        r.demoras,
-        r.demorasPct,
-        r.disponibilidad
-      ].join(',');
-    });
+  const [isExportingPDF, setIsExportingPDF] = useState(false);
 
-    const csvContent = '\uFEFF' + [headers.join(','), ...rows].join('\n');
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = `Reporte_KPI_${selectedPeriod.replace(/\s+/g, '_')}.csv`;
-    link.click();
+  const handleExportPDF = async () => {
+    if (sortedRecords.length === 0) {
+      alert('No hay registros para exportar con los filtros seleccionados.');
+      return;
+    }
+    setIsExportingPDF(true);
+    try {
+      await exportOperationalKPItoPDF({
+        records: sortedRecords,
+        period: selectedPeriod,
+        selectedCanal,
+        selectedSup,
+        supervisorMap,
+        storeMap,
+        kpiSummary,
+        thresholds
+      });
+    } catch (err) {
+      console.error('Error al generar PDF:', err);
+    } finally {
+      setIsExportingPDF(false);
+    }
   };
 
   return (
@@ -410,11 +404,17 @@ export function OperationalDashboard({
               )}
             </div>
             <button
-              onClick={exportCSV}
-              className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-900/90 hover:bg-slate-800 border border-slate-700/70 hover:border-slate-600 text-xs font-bold text-slate-200 hover:text-white transition-all duration-200 hover:-translate-y-0.5 active:scale-95 shadow-sm cursor-pointer"
+              onClick={handleExportPDF}
+              disabled={isExportingPDF}
+              className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-900/90 hover:bg-slate-800 border border-slate-700/70 hover:border-slate-600 text-xs font-bold text-slate-200 hover:text-white transition-all duration-200 hover:-translate-y-0.5 active:scale-95 shadow-sm cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+              title="Exportar reporte de grilla en formato PDF"
             >
-              <Download className="w-3.5 h-3.5" />
-              <span>Exportar</span>
+              {isExportingPDF ? (
+                <div className="w-3.5 h-3.5 border-2 border-amber-400 border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <Download className="w-3.5 h-3.5 text-amber-400" />
+              )}
+              <span>{isExportingPDF ? 'Generando PDF...' : 'Exportar PDF'}</span>
             </button>
           </div>
         </div>
