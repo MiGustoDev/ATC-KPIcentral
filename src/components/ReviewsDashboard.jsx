@@ -383,13 +383,46 @@ export function ReviewsDashboard({ supervisors, stores }) {
 
       {/* Reviews Table */}
       <div className="rev-table-container glass-panel rounded-2xl overflow-hidden shadow-2xl border border-slate-800/80">
-        <div className="px-4 py-3.5 border-b border-slate-800/80 flex flex-wrap items-center justify-between gap-2 bg-slate-950/60">
-          <h3 className="font-bold text-xs sm:text-sm text-white">
-            Puntuaciones Relevadas ({filteredItems.length} registros)
-          </h3>
-          <span className="text-xs text-slate-400 font-medium">
-            PedidosYa &bull; Rappi &bull; Mercado Delivery &bull; TePido &bull; Google Maps
-          </span>
+        <div className="px-4 py-3.5 border-b border-slate-800/80 flex flex-wrap items-center justify-between gap-3 bg-slate-950/60">
+          <div className="flex items-center gap-2.5">
+            <div className="w-7 h-7 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
+              <Star className="w-3.5 h-3.5 fill-amber-400/30" />
+            </div>
+            <div className="flex items-center gap-2">
+              <h3 className="font-bold text-sm text-white tracking-tight">
+                Puntuaciones Relevadas
+              </h3>
+              <span className="px-2 py-0.5 rounded-full bg-slate-800/90 border border-slate-700/70 text-amber-300 font-mono-numbers text-xs font-bold">
+                {filteredItems.length} registros
+              </span>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <span className="text-[11px] font-semibold text-slate-400 mr-1 hidden sm:inline">Canales monitoreados:</span>
+            {REVIEW_CHANNELS.map((ch) => {
+              const isCurrentFilter = selectedCanal === ch.id;
+              const isAll = selectedCanal === 'ALL';
+              return (
+                <span
+                  key={ch.id}
+                  className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-bold border transition-all duration-200 ${
+                    isCurrentFilter
+                      ? 'bg-slate-800 text-white border-slate-600 shadow-sm'
+                      : isAll
+                      ? 'bg-slate-900/80 text-slate-300 border-slate-800/80'
+                      : 'bg-slate-950/40 text-slate-500 border-slate-800/40 opacity-40'
+                  }`}
+                >
+                  <span
+                    className="w-1.5 h-1.5 rounded-full shadow-sm shrink-0"
+                    style={{ backgroundColor: ch.color }}
+                  />
+                  {ch.label}
+                </span>
+              );
+            })}
+          </div>
         </div>
 
         <div className="overflow-x-auto">
@@ -508,6 +541,27 @@ export function ReviewsDashboard({ supervisors, stores }) {
               })}
             </tbody>
           </table>
+        </div>
+
+        {/* Table Summary Footer */}
+        <div className="bg-slate-950/80 border-t border-slate-800/80 px-4 py-3 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-400">
+          <span className="font-medium">
+            Mostrando <strong className="text-white font-mono-numbers">{filteredItems.length}</strong> sucursales y canales
+          </span>
+          <div className="flex items-center gap-4 text-[11px]">
+            <span className="inline-flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-emerald-400" />
+              <span className="text-slate-300">En alza</span>
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-slate-400" />
+              <span className="text-slate-300">Estable</span>
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-rose-400" />
+              <span className="text-slate-300">Alerta Caída</span>
+            </span>
+          </div>
         </div>
       </div>
 
