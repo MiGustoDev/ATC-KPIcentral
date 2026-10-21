@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
-import { REVIEW_CHANNELS } from '../config';
+import { REVIEW_CHANNELS, CANAL_THEMES } from '../config';
 import { AnimatedCounter } from './AnimatedCounter';
 import { ModalWrapper } from './ModalWrapper';
 import { CustomSelect } from './CustomSelect';
@@ -222,30 +222,38 @@ export function ReviewsDashboard({ supervisors, stores }) {
             {/* Canal Switcher - Modern Segmented Control */}
             <div className="flex items-center gap-2">
               <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Canal</span>
-              <div className="inline-flex rounded-xl bg-slate-950/80 p-1 border border-slate-800/80 shadow-inner">
+              <div className={`inline-flex rounded-xl bg-slate-950/80 p-1 border shadow-inner transition-colors duration-300 ${
+                selectedCanal === 'PedidosYa' ? 'border-red-500/40' :
+                selectedCanal === 'Rappi' ? 'border-orange-500/40' :
+                selectedCanal === 'Mercado Delivery' ? 'border-amber-400/40' :
+                selectedCanal === 'TePido' ? 'border-blue-500/40' :
+                'border-slate-800/80'
+              }`}>
                 <button
                   onClick={() => setSelectedCanal('ALL')}
-                  className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all duration-200 cursor-pointer ${
+                  className={`px-3 py-1.5 text-xs rounded-lg transition-all duration-200 cursor-pointer ${
                     selectedCanal === 'ALL'
-                      ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 shadow-md shadow-amber-500/20'
-                      : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40'
+                      ? CANAL_THEMES.ALL.active
+                      : CANAL_THEMES.ALL.inactive
                   }`}
                 >
                   Todos (5)
                 </button>
-                {REVIEW_CHANNELS.map((c) => (
-                  <button
-                    key={c.id}
-                    onClick={() => setSelectedCanal(c.id)}
-                    className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all duration-200 cursor-pointer ${
-                      selectedCanal === c.id
-                        ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 shadow-md shadow-amber-500/20'
-                        : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40'
-                    }`}
-                  >
-                    {c.label}
-                  </button>
-                ))}
+                {REVIEW_CHANNELS.map((c) => {
+                  const theme = CANAL_THEMES[c.id] || CANAL_THEMES.ALL;
+                  const isSelected = selectedCanal === c.id;
+                  return (
+                    <button
+                      key={c.id}
+                      onClick={() => setSelectedCanal(c.id)}
+                      className={`px-3 py-1.5 text-xs rounded-lg transition-all duration-200 cursor-pointer ${
+                        isSelected ? theme.active : theme.inactive
+                      }`}
+                    >
+                      {c.label}
+                    </button>
+                  );
+                })}
               </div>
             </div>
 

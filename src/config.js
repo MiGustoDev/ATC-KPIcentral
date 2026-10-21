@@ -113,3 +113,31 @@ export const REVIEW_CHANNELS = [
   { id: 'TePido', label: 'TePido', color: '#2563eb' },
   { id: 'Google', label: 'Google Maps', color: '#4b5563' }
 ];
+
+export const CANAL_THEMES = {
+  ALL: {
+    active: 'bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 shadow-md shadow-amber-500/25 font-bold',
+    inactive: 'text-slate-400 hover:text-amber-300 hover:bg-slate-800/40 font-medium'
+  },
+  PedidosYa: {
+    active: 'bg-gradient-to-r from-red-600 to-red-500 text-white shadow-md shadow-red-600/35 border border-red-400/40 font-bold',
+    inactive: 'text-slate-400 hover:text-red-400 hover:bg-red-500/10 font-medium'
+  },
+  Rappi: {
+    active: 'bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-md shadow-orange-500/35 border border-orange-400/40 font-bold',
+    inactive: 'text-slate-400 hover:text-orange-400 hover:bg-orange-500/10 font-medium'
+  },
+  'Mercado Delivery': {
+    active: 'bg-gradient-to-r from-amber-500 via-amber-500 to-yellow-500 text-white shadow-md shadow-amber-500/30 border border-amber-400/50 font-bold',
+    inactive: 'text-slate-400 hover:text-amber-300 hover:bg-amber-400/10 font-medium'
+  },
+  TePido: {
+    active: 'bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-md shadow-blue-600/35 border border-blue-400/40 font-bold',
+    inactive: 'text-slate-400 hover:text-blue-400 hover:bg-blue-500/10 font-medium'
+  },
+  Google: {
+    active: 'bg-gradient-to-r from-slate-600 to-slate-700 text-white shadow-md shadow-slate-700/35 border border-slate-500/40 font-bold',
+    inactive: 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40 font-medium'
+  }
+};
+

@@ -6,7 +6,7 @@ import {
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import { fmtInt, fmtCurrency, fmtPct, getMetricStatus, getInitials } from '../utils';
-import { CHANNELS } from '../config';
+import { CHANNELS, CANAL_THEMES } from '../config';
 import { AnimatedCounter } from './AnimatedCounter';
 import { CustomSelect } from './CustomSelect';
 
@@ -333,30 +333,37 @@ export function OperationalDashboard({
               <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
                 Canal
               </span>
-              <div className="inline-flex rounded-xl bg-slate-950/80 p-1 border border-slate-800/80 shadow-inner">
+              <div className={`inline-flex rounded-xl bg-slate-950/80 p-1 border shadow-inner transition-colors duration-300 ${
+                selectedCanal === 'PedidosYa' ? 'border-red-500/40' :
+                selectedCanal === 'Rappi' ? 'border-orange-500/40' :
+                selectedCanal === 'Mercado Delivery' ? 'border-amber-400/40' :
+                'border-slate-800/80'
+              }`}>
                 <button
                   onClick={() => setSelectedCanal('ALL')}
-                  className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all duration-200 cursor-pointer ${
+                  className={`px-3 py-1.5 text-xs rounded-lg transition-all duration-200 cursor-pointer ${
                     selectedCanal === 'ALL'
-                      ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 shadow-md shadow-amber-500/20'
-                      : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40'
+                      ? CANAL_THEMES.ALL.active
+                      : CANAL_THEMES.ALL.inactive
                   }`}
                 >
                   Todos
                 </button>
-                {CHANNELS.map((ch) => (
-                  <button
-                    key={ch.id}
-                    onClick={() => setSelectedCanal(ch.id)}
-                    className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all duration-200 cursor-pointer ${
-                      selectedCanal === ch.id
-                        ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 shadow-md shadow-amber-500/20'
-                        : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40'
-                    }`}
-                  >
-                    {ch.label}
-                  </button>
-                ))}
+                {CHANNELS.map((ch) => {
+                  const theme = CANAL_THEMES[ch.id] || CANAL_THEMES.ALL;
+                  const isSelected = selectedCanal === ch.id;
+                  return (
+                    <button
+                      key={ch.id}
+                      onClick={() => setSelectedCanal(ch.id)}
+                      className={`px-3 py-1.5 text-xs rounded-lg transition-all duration-200 cursor-pointer ${
+                        isSelected ? theme.active : theme.inactive
+                      }`}
+                    >
+                      {ch.label}
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
