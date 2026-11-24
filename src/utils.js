@@ -1,31 +1,42 @@
 import * as XLSX from 'xlsx';
 
-// Store name normalization dictionary
+// Clean search helper: removes accents, whitespace, lowercase
+export function cleanSearch(str) {
+  if (!str) return '';
+  return String(str)
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .trim();
+}
+
+// Robust Store name normalization dictionary
 export function normalizeStoreName(name) {
   if (!name) return '';
   let n = String(name).trim();
   n = n.replace(/^(Mi Gusto|Mi gusto)\s*[-–—]?\s*/i, '').trim();
+  n = n.replace(/\.+$/, '').trim(); // Remove trailing dots e.g. 'Bella Vista.'
   n = n.replace(/\s+/g, ' ');
 
-  const aliases = {
-    'Cañitas': 'Las Cañitas',
-    'Las Canitas': 'Las Cañitas',
-    'Canitas': 'Las Cañitas',
-    'Vicente Lopez': 'Vicente López',
-    'Pacheco': 'General Pacheco',
-    'Polvorines': 'Los Polvorines',
-    'Maschwitz': 'Ingeniero Maschwitz',
-    'Ing Maschwitz': 'Ingeniero Maschwitz',
-    'San Martin': 'San Martín',
-    'San Miguel': 'San Miguel',
-    'Muniz': 'Muñiz',
-    'Martinez': 'Martínez',
-    'Jose C Paz': 'José C. Paz',
-    'Jose C. Paz': 'José C. Paz',
-    'Barrancas De Belgrano': 'Barrancas de Belgrano',
-  };
+  const clean = cleanSearch(n);
 
-  return aliases[n] || n;
+  if (/^(villa\s+)?devoto$/i.test(clean)) return 'Devoto';
+  if (/^(la\s+)?paternal$/i.test(clean)) return 'Paternal';
+  if (/^barrancas(\s+de\s+belgrano)?$/i.test(clean)) return 'Barrancas de Belgrano';
+  if (/^bella\s+vista$/i.test(clean)) return 'Bella Vista';
+  if (/^(las\s+)?canitas$/i.test(clean)) return 'Las Cañitas';
+  if (/^jose\s+c\.?\s*paz$/i.test(clean)) return 'José C. Paz';
+  if (/^vicente\s+lopez$/i.test(clean)) return 'Vicente López';
+  if (/^(gral\.?|general)\s+pacheco$/i.test(clean)) return 'General Pacheco';
+  if (/^(los\s+)?polvorines$/i.test(clean)) return 'Los Polvorines';
+  if (/^(ing\.?|ingeniero)\s+maschwitz$/i.test(clean)) return 'Ingeniero Maschwitz';
+  if (/^san\s+martin$/i.test(clean)) return 'San Martín';
+  if (/^san\s+miguel$/i.test(clean)) return 'San Miguel';
+  if (/^muniz$/i.test(clean)) return 'Muñiz';
+  if (/^martinez$/i.test(clean)) return 'Martínez';
+  if (/^pilar\s+palmas$/i.test(clean)) return 'Pilar Palmas';
+
+  return n;
 }
 
 export function cleanNum(v, defaultVal = 0) {

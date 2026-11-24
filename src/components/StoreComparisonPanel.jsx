@@ -3,7 +3,7 @@ import {
   TrendingUp, TrendingDown, ArrowRight, Store, Calendar,
   CheckCircle2, AlertTriangle, AlertCircle, ChevronDown, Award, Search, Filter, Download
 } from 'lucide-react';
-import { fmtInt, fmtCurrency, fmtPct, getMetricStatus } from '../utils';
+import { fmtInt, fmtCurrency, fmtPct, getMetricStatus, normalizeStoreName, cleanSearch } from '../utils';
 import { exportStoreComparisonPanelPDF } from '../utils/pdfExport';
 
 /**
@@ -166,11 +166,11 @@ export function StoreComparisonPanel({
   // Extract unique store names from available records
   const allStoreNames = useMemo(() => {
     const set = new Set();
-    stores.forEach((s) => set.add(s.name));
+    stores.forEach((s) => set.add(normalizeStoreName(s.name)));
     Object.values(datasets).forEach((ds) => {
-      (ds?.records || []).forEach((r) => set.add(r.tienda));
+      (ds?.records || []).forEach((r) => set.add(normalizeStoreName(r.tienda)));
     });
-    return Array.from(set).sort((a, b) => a.localeCompare(b));
+    return Array.from(set).sort((a, b) => a.localeCompare(b, 'es', { sensitivity: 'base' }));
   }, [stores, datasets]);
 
   // Comparison data calculation per store
@@ -182,19 +182,48 @@ export function StoreComparisonPanel({
     const recordsA = datasets[periodA]?.records || [];
     const recordsB = datasets[periodB]?.records || [];
 
-    // Map store + canal
-    // If selectedStore !== 'ALL', filter specifically
+    // Map store + canal with normalization
     const storeMapA = new Map();
     const storeMapB = new Map();
 
     recordsA.forEach((r) => {
-      const key = `${r.tienda.toLowerCase()}__${r.canal}`;
-      storeMapA.set(key, r);
+      const storeNorm = normalizeStoreName(r.tienda);
+      const canalNorm = (r.canal === 'PedidosYa') ? 'PEYA' : r.canal;
+      const key = `${storeNorm.toLowerCase()}__${canalNorm}`;
+      if (!storeMapA.has(key)) {
+        storeMapA.set(key, { ...r, tienda: storeNorm, canal: canalNorm });
+      } else {
+        const existing = storeMapA.get(key);
+        storeMapA.set(key, {
+          ...existing,
+          confirmadas: (existing.confirmadas || 0) + (r.confirmadas || 0),
+          cancelaciones: (existing.cancelaciones || 0) + (r.cancelaciones || 0),
+          cancelacionesCosto: (existing.cancelacionesCosto || 0) + (r.cancelacionesCosto || 0),
+          reclamos: (existing.reclamos || 0) + (r.reclamos || 0),
+          reclamosCosto: (existing.reclamosCosto || 0) + (r.reclamosCosto || 0),
+          demoras: (existing.demoras || 0) + (r.demoras || 0)
+        });
+      }
     });
 
     recordsB.forEach((r) => {
-      const key = `${r.tienda.toLowerCase()}__${r.canal}`;
-      storeMapB.set(key, r);
+      const storeNorm = normalizeStoreName(r.tienda);
+      const canalNorm = (r.canal === 'PedidosYa') ? 'PEYA' : r.canal;
+      const key = `${storeNorm.toLowerCase()}__${canalNorm}`;
+      if (!storeMapB.has(key)) {
+        storeMapB.set(key, { ...r, tienda: storeNorm, canal: canalNorm });
+      } else {
+        const existing = storeMapB.get(key);
+        storeMapB.set(key, {
+          ...existing,
+          confirmadas: (existing.confirmadas || 0) + (r.confirmadas || 0),
+          cancelaciones: (existing.cancelaciones || 0) + (r.cancelaciones || 0),
+          cancelacionesCosto: (existing.cancelacionesCosto || 0) + (r.cancelacionesCosto || 0),
+          reclamos: (existing.reclamos || 0) + (r.reclamos || 0),
+          reclamosCosto: (existing.reclamosCosto || 0) + (r.reclamosCosto || 0),
+          demoras: (existing.demoras || 0) + (r.demoras || 0)
+        });
+      }
     });
 
     // Collect all keys
@@ -239,20 +268,23 @@ export function StoreComparisonPanel({
       }
 
       // Filter by Store
-      if (selectedStore !== 'ALL' && storeName.toLowerCase() !== selectedStore.toLowerCase()) {
-        return;
+      if (selectedStore !== 'ALL') {
+        const normSelected = normalizeStoreName(selectedStore).toLowerCase();
+        if (storeLower !== normSelected && normalizeStoreName(storeName).toLowerCase() !== normSelected) {
+          return;
+        }
       }
 
       // Filter by Supervisor
-      const supId = storeMap[storeLower];
+      const supId = storeMap[storeLower] || storeMap[normalizeStoreName(storeName).toLowerCase()];
       if (selectedSup !== 'ALL' && supId !== selectedSup) {
         return;
       }
 
       // Filter by Search Query
       if (searchQuery) {
-        const q = searchQuery.toLowerCase();
-        if (!storeName.toLowerCase().includes(q) && !canal.toLowerCase().includes(q)) {
+        const q = cleanSearch(searchQuery);
+        if (!cleanSearch(storeName).includes(q) && !cleanSearch(canal).includes(q)) {
           return;
         }
       }

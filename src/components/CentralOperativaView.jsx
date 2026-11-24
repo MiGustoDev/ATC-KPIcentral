@@ -6,28 +6,17 @@ import {
   HelpCircle, Eye, EyeOff, Copy, CheckCheck, Clock, MessageSquareWarning,
   Flame, CheckSquare, ListTodo, CalendarDays, Trash2, Smartphone, Sparkles
 } from 'lucide-react';
-import { fmtInt, fmtCurrency } from '../utils';
+import { fmtInt, fmtCurrency, normalizeStoreName, cleanSearch } from '../utils';
 import { StoreComparisonPanel } from './StoreComparisonPanel';
 import { RegisterIncidentModal } from './RegisterIncidentModal';
 import { ScheduleActivityModal } from './ScheduleActivityModal';
 import { fetchSettingFromCloud, saveSettingToCloud } from '../supabaseClient';
 
-// Helper to normalize store names across variants
-export function normalizeStoreName(rawName) {
-  if (!rawName) return '';
-  const trimmed = rawName.trim().replace(/\.$/, '');
-  if (/^barrancas(\s+de\s+belgrano)?$/i.test(trimmed)) return 'Barrancas';
-  if (/^(villa\s+)?devoto$/i.test(trimmed)) return 'Devoto';
-  if (/^(la\s+)?paternal$/i.test(trimmed)) return 'Paternal';
-  if (/^bella\s+vista$/i.test(trimmed)) return 'Bella Vista';
-  return trimmed;
-}
-
 // CABA vs GBA classification
 const CABA_STORES = new Set([
-  'balvanera', 'barrancas', 'belgrano', 'caballito', 'floresta', 
-  'paternal', 'las cañitas', 'mataderos', 'palermo', 'puerto madero', 
-  'villa crespo', 'devoto', 'villa urquiza'
+  'balvanera', 'barrancas', 'barrancas de belgrano', 'belgrano', 'caballito', 'floresta', 
+  'paternal', 'la paternal', 'las cañitas', 'canitas', 'mataderos', 'palermo', 'puerto madero', 
+  'villa crespo', 'devoto', 'villa devoto', 'villa urquiza'
 ]);
 
 export function getStoreZone(storeName) {
@@ -453,7 +442,15 @@ export function CentralOperativaView({
   stores = [],
   supervisors = [],
   storeMap = {},
-  supervisorMap = {}
+  supervisorMap = {},
+  selectedCanal = 'ALL',
+  onCanalChange,
+  selectedSup = 'ALL',
+  onSupChange,
+  searchTerm = '',
+  onSearchChange,
+  filterOnlyCritical = false,
+  onToggleCritical
 }) {
   const isGuest = currentUser?.role === 'guest';
 
@@ -462,9 +459,46 @@ export function CentralOperativaView({
   const [vistaType, setVistaType] = useState('semanal');
   const [filterZona, setFilterZona] = useState('ALL');
   const [filterSucursal, setFilterSucursal] = useState('ALL');
-  const [filterApp, setFilterApp] = useState('ALL');
-  const [searchStore, setSearchStore] = useState('');
-  const [onlyDesvios, setOnlyDesvios] = useState(false);
+
+  // Filter App state synced with selectedCanal
+  const [filterApp, setFilterApp] = useState(selectedCanal || 'ALL');
+  useEffect(() => {
+    if (selectedCanal !== undefined) {
+      setFilterApp(selectedCanal);
+    }
+  }, [selectedCanal]);
+
+  const handleAppChange = (val) => {
+    setFilterApp(val);
+    if (onCanalChange) onCanalChange(val);
+  };
+
+  // Search store state synced with searchTerm
+  const [searchStore, setSearchStore] = useState(searchTerm || '');
+  useEffect(() => {
+    if (searchTerm !== undefined) {
+      setSearchStore(searchTerm);
+    }
+  }, [searchTerm]);
+
+  const handleSearchChange = (val) => {
+    setSearchStore(val);
+    if (onSearchChange) onSearchChange(val);
+  };
+
+  // Only desvios state synced with filterOnlyCritical
+  const [onlyDesvios, setOnlyDesvios] = useState(filterOnlyCritical || false);
+  useEffect(() => {
+    if (filterOnlyCritical !== undefined) {
+      setOnlyDesvios(filterOnlyCritical);
+    }
+  }, [filterOnlyCritical]);
+
+  const handleToggleDesvios = () => {
+    const nextVal = !onlyDesvios;
+    setOnlyDesvios(nextVal);
+    if (onToggleCritical) onToggleCritical();
+  };
 
   // Copy text toast notification
   const [copiedId, setCopiedId] = useState(null);
@@ -760,14 +794,40 @@ export function CentralOperativaView({
       const zona = getStoreZone(store);
       if (filterZona !== 'ALL' && zona !== filterZona) return false;
       if (filterSucursal !== 'ALL' && store !== filterSucursal) return false;
-      if (searchStore && !store.toLowerCase().includes(searchStore.toLowerCase())) return false;
-      if (onlyDesvios) {
-        const hasDesvio = APPS.some((app) => isCardDesvio(currentStoreAppMap[`${store}___${app.id}`]));
-        if (!hasDesvio) return false;
+
+      // Filter by Supervisora
+      if (selectedSup && selectedSup !== 'ALL') {
+        const norm = normalizeStoreName(store).toLowerCase();
+        const supId = storeMap[norm] || storeMap[store.toLowerCase()];
+        if (supId !== selectedSup) return false;
       }
+
+      // Filter by Search with accent insensitivity
+      if (searchStore) {
+        const q = cleanSearch(searchStore);
+        if (!cleanSearch(store).includes(q)) return false;
+      }
+
+      // Filter by Canal / App (must have records for that app if filtered)
+      if (filterApp !== 'ALL') {
+        const key = `${store}___${filterApp}`;
+        if (!currentStoreAppMap[key]) return false;
+      }
+
+      // Filter by Only Deviations
+      if (onlyDesvios) {
+        if (filterApp !== 'ALL') {
+          const item = currentStoreAppMap[`${store}___${filterApp}`];
+          if (!isCardDesvio(item)) return false;
+        } else {
+          const hasDesvio = APPS.some((app) => isCardDesvio(currentStoreAppMap[`${store}___${app.id}`]));
+          if (!hasDesvio) return false;
+        }
+      }
+
       return true;
     });
-  }, [allStores, filterZona, filterSucursal, searchStore, onlyDesvios, currentStoreAppMap]);
+  }, [allStores, filterZona, filterSucursal, selectedSup, storeMap, searchStore, filterApp, onlyDesvios, currentStoreAppMap]);
 
   // Header KPI stats
   const kpiStats = useMemo(() => {
@@ -777,13 +837,15 @@ export function CentralOperativaView({
     let faltantesCount = 0;
 
     visibleStores.forEach((store) => {
-      APPS.forEach((app) => {
-        if (filterApp !== 'ALL' && filterApp !== app.id) return;
+      const appsToCheck = (filterApp !== 'ALL') ? APPS.filter(a => a.id === filterApp) : APPS;
+      appsToCheck.forEach((app) => {
         const key = `${store}___${app.id}`;
         const item = currentStoreAppMap[key];
         if (item) {
           totalConfirmados += (item.confirmadas || 0);
           if (isCardDesvio(item)) desviosCount++;
+        } else {
+          faltantesCount++;
         }
       });
     });
@@ -799,9 +861,10 @@ export function CentralOperativaView({
   // Priorities: Stores with severe issues (demoras > 10% or reclamos > 2.5% or canc > 2%)
   const priorityStores = useMemo(() => {
     const list = [];
-    allStores.forEach((store) => {
+    visibleStores.forEach((store) => {
       const issues = [];
-      APPS.forEach((app) => {
+      const appsToCheck = (filterApp !== 'ALL') ? APPS.filter(a => a.id === filterApp) : APPS;
+      appsToCheck.forEach((app) => {
         const item = currentStoreAppMap[`${store}___${app.id}`];
         if (!item) return;
         if (item.demorasPct > 10) issues.push({ app: app.label, type: 'Demora crítica', value: `${item.demorasPct}%`, severity: 'high' });
@@ -814,13 +877,14 @@ export function CentralOperativaView({
       }
     });
     return list.sort((a, b) => b.score - a.score);
-  }, [allStores, currentStoreAppMap]);
+  }, [visibleStores, currentStoreAppMap, filterApp]);
 
   // Incidencias: Detailed incidents list per store & canal
   const incidenciasList = useMemo(() => {
     const list = [];
-    allStores.forEach((store) => {
-      APPS.forEach((app) => {
+    visibleStores.forEach((store) => {
+      const appsToCheck = (filterApp !== 'ALL') ? APPS.filter(a => a.id === filterApp) : APPS;
+      appsToCheck.forEach((app) => {
         const item = currentStoreAppMap[`${store}___${app.id}`];
         if (!item) return;
         if (item.reclamos > 0 || item.cancelaciones > 0 || item.demoras > 10) {
@@ -839,7 +903,7 @@ export function CentralOperativaView({
       });
     });
     return list.sort((a, b) => b.reclamos - a.reclamos || b.demoras - a.demoras);
-  }, [allStores, currentStoreAppMap]);
+  }, [visibleStores, currentStoreAppMap, filterApp]);
 
   // Textos para copiar: Prepared message templates for WhatsApp / Telegram with managers
   const copyTemplates = useMemo(() => {
@@ -1029,7 +1093,7 @@ export function CentralOperativaView({
               <CustomStyledSelect
                 label="Canal / App"
                 value={filterApp}
-                onChange={setFilterApp}
+                onChange={handleAppChange}
                 options={[
                   { value: 'ALL', label: 'Todas las apps', dotColor: 'bg-slate-400' },
                   { value: 'PEYA', label: 'PedidosYa', dotColor: 'bg-rose-500' },
@@ -1048,13 +1112,13 @@ export function CentralOperativaView({
                   type="text"
                   placeholder="Buscar sucursal..."
                   value={searchStore}
-                  onChange={(e) => setSearchStore(e.target.value)}
+                  onChange={(e) => handleSearchChange(e.target.value)}
                   className="w-full bg-slate-950 border border-slate-800 hover:border-slate-700 rounded-xl pl-9 pr-3 py-2 text-xs font-medium text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-rose-500/20"
                 />
               </div>
 
               <button
-                onClick={() => setOnlyDesvios(!onlyDesvios)}
+                onClick={handleToggleDesvios}
                 className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold border transition-colors cursor-pointer shrink-0 ${
                   onlyDesvios
                     ? 'bg-rose-950/80 text-rose-300 border-rose-500/50 shadow-sm'
@@ -1136,30 +1200,46 @@ export function CentralOperativaView({
           <div className="bg-slate-900/95 rounded-2xl border border-slate-800/90 shadow-2xl overflow-hidden">
             {/* Table Header */}
             <div className="grid grid-cols-12 bg-slate-950/95 border-b border-slate-800/90 text-slate-300 py-4 px-5 text-xs font-extrabold uppercase tracking-wider">
-              <div className="col-span-3">Sucursal / Zona</div>
-              <div className="col-span-3 flex items-center gap-2 text-rose-400">
-                <span className="w-2.5 h-2.5 rounded-full bg-rose-500" />
-                <span>PedidosYa</span>
-              </div>
-              <div className="col-span-3 flex items-center gap-2 text-orange-400">
-                <span className="w-2.5 h-2.5 rounded-full bg-orange-500" />
-                <span>Rappi</span>
-              </div>
-              <div className="col-span-3 flex items-center gap-2 text-amber-400">
-                <span className="w-2.5 h-2.5 rounded-full bg-amber-400" />
-                <span>Mercado Delivery</span>
-              </div>
+              <div className={filterApp === 'ALL' ? 'col-span-3' : 'col-span-4'}>Sucursal / Zona</div>
+              {filterApp === 'ALL' ? (
+                <>
+                  <div className="col-span-3 flex items-center gap-2 text-rose-400">
+                    <span className="w-2.5 h-2.5 rounded-full bg-rose-500" />
+                    <span>PedidosYa</span>
+                  </div>
+                  <div className="col-span-3 flex items-center gap-2 text-orange-400">
+                    <span className="w-2.5 h-2.5 rounded-full bg-orange-500" />
+                    <span>Rappi</span>
+                  </div>
+                  <div className="col-span-3 flex items-center gap-2 text-amber-400">
+                    <span className="w-2.5 h-2.5 rounded-full bg-amber-400" />
+                    <span>Mercado Delivery</span>
+                  </div>
+                </>
+              ) : (
+                (() => {
+                  const activeAppObj = APPS.find((a) => a.id === filterApp) || APPS[0];
+                  return (
+                    <div className="col-span-8 flex items-center gap-2" style={{ color: activeAppObj.brandColor }}>
+                      <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: activeAppObj.brandColor }} />
+                      <span>{activeAppObj.label}</span>
+                    </div>
+                  );
+                })()
+              )}
             </div>
 
             {/* Table Rows per Store */}
             <div className="divide-y divide-slate-800/80">
               {visibleStores.map((store) => {
                 const zona = getStoreZone(store);
+                const displayedApps = filterApp === 'ALL' ? APPS : APPS.filter(a => a.id === filterApp);
+                const colSpanClass = filterApp === 'ALL' ? 'col-span-3' : 'col-span-8';
 
                 return (
                   <div key={store} className="grid grid-cols-12 p-4 sm:p-5 items-stretch hover:bg-slate-850/40 transition-colors gap-y-4">
                     {/* Store Info Column */}
-                    <div className="col-span-3 pr-4 flex flex-col justify-start border-r border-slate-800/60">
+                    <div className={`${filterApp === 'ALL' ? 'col-span-3' : 'col-span-4'} pr-4 flex flex-col justify-start border-r border-slate-800/60`}>
                       <span className="font-extrabold text-base text-white tracking-tight">{store}</span>
                       <div className="mt-1 flex items-center gap-1.5">
                         <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-md border tracking-wider ${
@@ -1172,15 +1252,15 @@ export function CentralOperativaView({
                       </div>
                     </div>
 
-                    {/* 3 App Columns */}
-                    {APPS.map((app) => {
+                    {/* App Columns */}
+                    {displayedApps.map((app) => {
                       const key = `${store}___${app.id}`;
                       const currentItem = currentStoreAppMap[key];
                       const prevItem = prevStoreAppMap[key];
 
                       if (!currentItem) {
                         return (
-                          <div key={app.id} className="col-span-3 px-3 py-3 border-r border-slate-800/60 last:border-r-0 flex flex-col items-center justify-center text-xs text-slate-500 italic bg-slate-950/20 rounded-xl mx-1">
+                          <div key={app.id} className={`${colSpanClass} px-3 py-3 border-r border-slate-800/60 last:border-r-0 flex flex-col items-center justify-center text-xs text-slate-500 italic bg-slate-950/20 rounded-xl mx-1`}>
                             <span className="text-[11px] text-slate-600">Sin registro</span>
                           </div>
                         );
@@ -1196,7 +1276,7 @@ export function CentralOperativaView({
                       return (
                         <div 
                           key={app.id} 
-                          className={`col-span-3 px-3.5 py-3 border-r border-slate-800/60 last:border-r-0 flex flex-col justify-between rounded-xl mx-1 transition-all ${
+                          className={`${colSpanClass} px-3.5 py-3 border-r border-slate-800/60 last:border-r-0 flex flex-col justify-between rounded-xl mx-1 transition-all ${
                             desvio 
                               ? 'bg-rose-950/15 border border-rose-500/20' 
                               : 'bg-slate-950/40 border border-slate-800/50'

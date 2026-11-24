@@ -11,6 +11,7 @@ import { AnimatedCounter } from './AnimatedCounter';
 import { ModalWrapper } from './ModalWrapper';
 import { CustomSelect } from './CustomSelect';
 import { ReviewsCharts } from './ReviewsCharts';
+import { normalizeStoreName, cleanSearch } from '../utils';
 
 // Initial synthetic monthly reviews structure covering 5 channels
 export const INITIAL_REVIEWS_DATA = {
@@ -180,11 +181,12 @@ export function ReviewsDashboard({ supervisors, stores, currentUser }) {
       .map((item, originalIndex) => ({ ...item, _originalIndex: originalIndex }))
       .filter((item) => {
         if (selectedCanal !== 'ALL' && item.canal !== selectedCanal) return false;
-        const supId = storeMap[item.tienda.toLowerCase()];
+        const normStore = normalizeStoreName(item.tienda).toLowerCase();
+        const supId = storeMap[normStore] || storeMap[item.tienda.toLowerCase()];
         if (selectedSup !== 'ALL' && supId !== selectedSup) return false;
         if (searchTerm) {
-          const q = searchTerm.toLowerCase();
-          if (!item.tienda.toLowerCase().includes(q) && !item.canal.toLowerCase().includes(q)) {
+          const q = cleanSearch(searchTerm);
+          if (!cleanSearch(item.tienda).includes(q) && !cleanSearch(item.canal).includes(q)) {
             return false;
           }
         }
@@ -484,7 +486,8 @@ export function ReviewsDashboard({ supervisors, stores, currentUser }) {
             </thead>
             <tbody className="divide-y divide-slate-800/50 font-mono-numbers">
               {filteredItems.map((item, idx) => {
-                const supId = storeMap[item.tienda.toLowerCase()];
+                const normStore = normalizeStoreName(item.tienda).toLowerCase();
+                const supId = storeMap[normStore] || storeMap[item.tienda.toLowerCase()];
                 const sup = supervisorMap[supId];
                 const diff = item.prevScore ? item.score - item.prevScore : 0;
                 const isDrop = diff < -0.15;

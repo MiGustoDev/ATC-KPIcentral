@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
-import { fmtInt, fmtCurrency, fmtPct, getMetricStatus, getInitials } from '../utils';
+import { fmtInt, fmtCurrency, fmtPct, getMetricStatus, getInitials, normalizeStoreName, cleanSearch } from '../utils';
 import { CHANNELS, CANAL_THEMES } from '../config';
 import { AnimatedCounter } from './AnimatedCounter';
 import { CustomSelect } from './CustomSelect';
@@ -145,12 +145,21 @@ export function OperationalDashboard({
     { scope: containerRef, dependencies: [selectedCanal, selectedSup, selectedPeriod, filterOnlyCritical] }
   );
 
-  // Map stores to supervisor
+  // Map stores to supervisor with robust normalization
   const storeMap = useMemo(() => {
     const map = {};
     stores.forEach((s) => {
+      const norm = normalizeStoreName(s.name).toLowerCase();
+      map[norm] = s.sup;
       map[s.name.toLowerCase()] = s.sup;
     });
+    // Extra safety mappings for raw Excel store names
+    map['bella vista.'] = map['bella vista'] || 'sup_evelyn';
+    map['villa devoto'] = map['devoto'] || 'sup_evelyn';
+    map['la paternal'] = map['paternal'] || 'sup_damaris';
+    map['jose c paz'] = map['josé c. paz'] || 'sup_evelyn';
+    map['pilar palmas'] = 'sup_evelyn';
+    map['barrancas'] = map['barrancas de belgrano'] || 'sup_damaris';
     return map;
   }, [stores]);
 
@@ -175,12 +184,15 @@ export function OperationalDashboard({
           if (!isMatch) return false;
         }
 
-        const supId = storeMap[rec.tienda.toLowerCase()];
+        const normStore = normalizeStoreName(rec.tienda).toLowerCase();
+        const supId = storeMap[normStore] || storeMap[rec.tienda.toLowerCase()];
         if (selectedSup !== 'ALL' && supId !== selectedSup) return false;
 
         if (searchTerm) {
-          const q = searchTerm.toLowerCase();
-          if (!rec.tienda.toLowerCase().includes(q) && !rec.canal.toLowerCase().includes(q)) {
+          const q = cleanSearch(searchTerm);
+          const storeClean = cleanSearch(rec.tienda);
+          const canalClean = cleanSearch(rec.canal);
+          if (!storeClean.includes(q) && !canalClean.includes(q)) {
             return false;
           }
         }
@@ -345,7 +357,8 @@ export function OperationalDashboard({
       : filteredRecords;
 
     targetRecords.forEach((r) => {
-      const supId = storeMap[r.tienda.toLowerCase()] || 'unassigned';
+      const normStore = normalizeStoreName(r.tienda).toLowerCase();
+      const supId = storeMap[normStore] || storeMap[r.tienda.toLowerCase()] || 'unassigned';
       if (!groups[supId]) {
         groups[supId] = {
           supervisor: { id: supId, name: supId, color: '#64748b' },
@@ -448,12 +461,13 @@ export function OperationalDashboard({
           if (!isMatch) return false;
         }
 
-        const supId = storeMap[rec.tienda.toLowerCase()];
+        const normStore = normalizeStoreName(rec.tienda).toLowerCase();
+        const supId = storeMap[normStore] || storeMap[rec.tienda.toLowerCase()];
         if (selectedSup !== 'ALL' && supId !== selectedSup) return false;
 
         if (searchTerm) {
-          const q = searchTerm.toLowerCase();
-          if (!rec.tienda.toLowerCase().includes(q) && !rec.canal.toLowerCase().includes(q)) {
+          const q = cleanSearch(searchTerm);
+          if (!cleanSearch(rec.tienda).includes(q) && !cleanSearch(rec.canal).includes(q)) {
             return false;
           }
         }
@@ -484,12 +498,13 @@ export function OperationalDashboard({
           if (!isMatch) return false;
         }
 
-        const supId = storeMap[rec.tienda.toLowerCase()];
+        const normStore = normalizeStoreName(rec.tienda).toLowerCase();
+        const supId = storeMap[normStore] || storeMap[rec.tienda.toLowerCase()];
         if (selectedSup !== 'ALL' && supId !== selectedSup) return false;
 
         if (searchTerm) {
-          const q = searchTerm.toLowerCase();
-          if (!rec.tienda.toLowerCase().includes(q) && !rec.canal.toLowerCase().includes(q)) {
+          const q = cleanSearch(searchTerm);
+          if (!cleanSearch(rec.tienda).includes(q) && !cleanSearch(rec.canal).includes(q)) {
             return false;
           }
         }
@@ -498,13 +513,15 @@ export function OperationalDashboard({
       });
 
       records.forEach((r) => {
-        const key = `${r.canal}__${r.tienda.toLowerCase()}`;
+        const storeNorm = normalizeStoreName(r.tienda);
+        const canalNorm = (r.canal === 'PedidosYa') ? 'PEYA' : r.canal;
+        const key = `${canalNorm}__${storeNorm.toLowerCase()}`;
         if (!map.has(key)) {
-          const supId = storeMap[r.tienda.toLowerCase()];
+          const supId = storeMap[storeNorm.toLowerCase()] || storeMap[r.tienda.toLowerCase()];
           const supName = supervisorMap[supId]?.name || 'Sin Asignar';
           map.set(key, {
-            canal: r.canal,
-            tienda: r.tienda,
+            canal: canalNorm,
+            tienda: storeNorm,
             supName,
             periods: {}
           });
@@ -1067,6 +1084,14 @@ export function OperationalDashboard({
             supervisors={supervisors}
             storeMap={storeMap}
             supervisorMap={supervisorMap}
+            selectedCanal={selectedCanal}
+            onCanalChange={setSelectedCanal}
+            selectedSup={selectedSup}
+            onSupChange={setSelectedSup}
+            searchTerm={searchTerm}
+            onSearchChange={setSearchTerm}
+            filterOnlyCritical={filterOnlyCritical}
+            onToggleCritical={() => setFilterOnlyCritical((prev) => !prev)}
           />
         </div>
       ) : activeTab === 'table' ? (
@@ -1194,7 +1219,8 @@ export function OperationalDashboard({
                 </thead>
                 <tbody className="divide-y divide-slate-800/50 font-mono-numbers">
                 {sortedRecords.map((r, idx) => {
-                  const supId = storeMap[r.tienda.toLowerCase()];
+                  const normStore = normalizeStoreName(r.tienda).toLowerCase();
+                  const supId = storeMap[normStore] || storeMap[r.tienda.toLowerCase()];
                   const sup = supervisorMap[supId];
                   const cancStatus = getMetricStatus('cancelacionesPct', r.cancelacionesPct, thresholds);
                   const recStatus = getMetricStatus('reclamosPct', r.reclamosPct, thresholds);

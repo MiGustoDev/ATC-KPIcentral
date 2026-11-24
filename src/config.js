@@ -74,6 +74,7 @@ export const INITIAL_STORES = [
   { id: 't_muniz', name: 'Muñiz', sup: 'sup_evelyn' },
   { id: 't_pilar_centro', name: 'Pilar Centro', sup: 'sup_evelyn' },
   { id: 't_pilar_derqui', name: 'Pilar Derqui', sup: 'sup_evelyn' },
+  { id: 't_pilar_palmas', name: 'Pilar Palmas', sup: 'sup_evelyn' },
   { id: 't_san_fernando', name: 'San Fernando', sup: 'sup_evelyn' },
   { id: 't_san_martin', name: 'San Martín', sup: 'sup_evelyn' },
   { id: 't_san_miguel', name: 'San Miguel', sup: 'sup_evelyn' },
